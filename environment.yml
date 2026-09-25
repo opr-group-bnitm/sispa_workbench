@@ -1,0 +1,12 @@
+# conda env create -f environment.yml
+# conda activate sispa_workbench
+name: sispa_workbench
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.9
+  - minimap2=2.26      # add_from_ref.py; same version as vimop
+  - sra-tools          # optional: download_datasets.sh fallback for runs ENA has no FASTQ for
+  - curl
+  - pytest             # tests/

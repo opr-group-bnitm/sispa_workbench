@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# sispa_workbench: sequencing data stays local, the folder skeleton is tracked
+data/raw_data/*
+data/references/*
+data/virus_reads/*
+data/bacteria_reads/*
+data/host_reads/*
+data/mixed_reads/*
+!data/*/.gitkeep
+# describes the local read files, regenerate with ./sync_reads.py
+data/organisms.tsv
+data/.organisms_cache.tsv
+output/fastqs/*
+!output/fastqs/.gitkeep

@@ -1,0 +1,313 @@
+dataset_id	include	study_accession	repository	dataset_accession	sample_type	organism_target	notes
+IAV-OXFORD	false	PRJEB32861	ENA		throat swab	IAV + Hazara spike	R9.4; host reads removed; titre dilution series
+FELV-MVM-PCV1	false	PRJNA1067635	SRA		spiked Jurkat cells	FeLV, MVM, PCV1	spike ladder with ddPCR copy numbers; negative controls
+RESP-344	false	PRJEB102181	ENA		nasopharyngeal swab	19 respiratory pathogens	344 samples; host reads removed; many near-empty runs
+SARS2-BC	false	PRJNA752146	SRA		nasopharyngeal swab	SARS-CoV-2	Ct range + negative controls; accession not verified
+AIR	false	PRJNA950127	SRA		air sampler	respiratory/enteric viruses	very low biomass; host reads removed; no truth
+IBV	false	PRJNA1320665	SRA	SAMN51157819;SAMN51157820	avian swab	IBV (divergent)	Ion Torrent, not ONT; 2 runs, 5.3 GB
+HPGV2	false	PRJNA1403610	SRA		human plasma	HPgV-2 + HCV	natural co-infection; good depth
+EVA71	false	PRJNA1249236	SRA		human clinical	EV-A71	10 runs; protocol not confirmed
+CHICKEN-ZA	false	PRJNA1155670	SRA		pooled chicken swabs	chicken virome	complex natural virome; no truth
+BATS-KH	false	PRJNA1267097	SRA		bat samples	sarbecoviruses	also has amplicon runs: pick SISPA runs by library name
+FEVER-SERUM	false	PRJNA1417234	SRA		human serum	febrile illness pathogens	very few reads per run
+HMPV-KENYA	false	PRJNA1306485	SRA		human respiratory	hMPV	SISPA not confirmed; low depth
+BTV-REPS	false	PRJNA1328794	SRA		cultured isolate	BTV-17	technical replicates Rep1-3; high depth
+BTV-SHEEP	false	PRJNA1475482	SRA		sheep whole blood	BTV	longitudinal 2021-2023; heavy host background
+BTV-CLIN	false	PRJNA1472133	SRA		ruminant samples	BTV	clinical vs subclinical load
+BTV-ZA	false	PRJNA1472097	SRA		cultured isolates	BTV, several serotypes	very low depth
+MIDGES	false	PRJNA1475494	SRA		Culicoides midges	orbiviruses + others	messiest background; no truth
+CDV	false	PRJNA1395693	SRA		wildlife tissue	CDV	low depth
+VEEV-TC83	false	PRJNA1461864	SRA		virus stock	VEEV TC-83 + Azurite	sequence known by design; 12 runs, 1.6 GB
+YFV	false	PRJNA1269522	SRA	SRR33752249	mosquito pools, NHP tissue	Yellow fever virus	RANDOM PCR, GridION; 89 runs, 4.3 GB; this run 0.6M reads, 0.2 GB
+BRD-CALVES	false	PRJNA884667	SRA	SRX17719980	calf nasal swab	BRD-associated viruses	RANDOM, MinION; 24 ONT runs, 8.4 GB (+Illumina); this run 1.6M reads, 3.5 GB
+TOBRFV	false	PRJNA632574	SRA	SRR11794480	tomato plant	ToBRFV	RT-PCR, not SISPA?; MinION; 3.0M reads, 3.0 GB
+PLANT-DSRNA	false	PRJNA944244	SRA	SRR23852723	grapevine	plant viruses, viroids	dsRNA direct cDNA, not SISPA; MinION; this run 1.8M reads, 1.4 GB
+STOOL-COAP	false	PRJEB95107	ENA	ERR15381844	human stool	gut microbiome	not SISPA; squidbase SQB000024; control stool, MinION, 1.2M reads, 1.3 GB
+VIMOP-SARS2	false	PRJNA752146	SRA	SRR15356294	nasopharyngeal swab	SARS-CoV-2	ViMOP Table S10; <500 viral reads, mostly bacterial; 86k reads, 0.06 GB
+VIMOP-WNV	false	PRJEB89228	ENA	ERR14941561	lab stock	West Nile virus	ViMOP Table S10; cell culture; only 403 reads
+VIMOP-ZIKV	false	PRJNA1180089	SRA	SRR31174237	lab stock	Zika virus	ViMOP Table S10; cell culture; 97k reads, 0.06 GB
+VIMOP-DENV	false	PRJNA1226364	SRA	SRR32419728	cultured serum isolate	Dengue virus	ViMOP Table S10; >147k viral reads; 298k reads, 0.14 GB
+BOV-6763	true	PRJNA634678	SRA	SRR11836763	bovine nasal swab	Bovine respirovirus 3	57672 viral reads; Bovine respirovirus 3 56920, Influenza D virus 637 +5
+BOV-6760	true	PRJNA634678	SRA	SRR11836760	bovine nasal swab	Bovine rhinitis B virus	42905 viral reads; Bovine rhinitis B virus 23408, Enterovirus E 18623 +10
+BOV-6866	false	PRJNA634678	SRA	SRR11836866	bovine nasal swab	Bovine rhinitis B virus	26267 viral reads; Bovine rhinitis B virus 26053, Foot-and-mouth disease virus 196 +3
+BOV-6771	false	PRJNA634678	SRA	SRR11836771	bovine nasal swab	Betacoronavirus 1	24026 viral reads; Betacoronavirus 1 12022, Bovine rhinitis B virus 6144 +9
+BOV-6783	false	PRJNA634678	SRA	SRR11836783	bovine nasal swab	Bovine rhinitis B virus	22849 viral reads; Bovine rhinitis B virus 22819, Foot-and-mouth disease virus 28 +2
+BOV-7043	false	PRJNA634678	SRA	SRR11837043	bovine nasal swab	Betacoronavirus 1	21583 viral reads; Betacoronavirus 1 21565, Murine coronavirus 12 +4
+BOV-6787	false	PRJNA634678	SRA	SRR11836787	bovine nasal swab	Bovine rhinitis B virus	20039 viral reads; Bovine rhinitis B virus 20017, Foot-and-mouth disease virus 21 +1
+BOV-6948	false	PRJNA634678	SRA	SRR11836948	bovine nasal swab	Bovine respirovirus 3	19544 viral reads; Bovine respirovirus 3 19539, Human respirovirus 1 2 +3
+BOV-6812	false	PRJNA634678	SRA	SRR11836812	bovine nasal swab	Enterovirus E	18609 viral reads; Enterovirus E 13457, Betacoronavirus 1 4995 +4
+BOV-7051	false	PRJNA634678	SRA	SRR11837051	bovine nasal swab	Betacoronavirus 1	18465 viral reads; Betacoronavirus 1 18444, Rabbit coronavirus HKU14 8 +6
+BOV-6977	false	PRJNA634678	SRA	SRR11836977	bovine nasal swab	Betacoronavirus 1	17598 viral reads; Betacoronavirus 1 17557, Camel coronavirus HKU23 12 +9
+BOV-6858	false	PRJNA634678	SRA	SRR11836858	bovine nasal swab	Betacoronavirus 1	15851 viral reads; Betacoronavirus 1 15803, Bovine rhinitis B virus 34 +7
+BOV-6782	false	PRJNA634678	SRA	SRR11836782	bovine nasal swab	Bovine rhinitis B virus	12670 viral reads; Bovine rhinitis B virus 12652, Foot-and-mouth disease virus 12 +4
+BOV-6960	false	PRJNA634678	SRA	SRR11836960	bovine nasal swab	Betacoronavirus 1	12019 viral reads; Betacoronavirus 1 12007, Rabbit coronavirus HKU14 6 +3
+BOV-6767	false	PRJNA634678	SRA	SRR11836767	bovine nasal swab	Influenza D virus	11083 viral reads; Influenza D virus 11024, Bovine rhinitis B virus 39 +2
+BOV-6792	false	PRJNA634678	SRA	SRR11836792	bovine nasal swab	Betacoronavirus 1	10750 viral reads; Betacoronavirus 1 10734, Murine coronavirus 5 +7
+BOV-6806	false	PRJNA634678	SRA	SRR11836806	bovine nasal swab	Bovine rhinitis B virus	10544 viral reads; Bovine rhinitis B virus 9605, Enterovirus E 918 +2
+BOV-6989	false	PRJNA634678	SRA	SRR11836989	bovine nasal swab	Betacoronavirus 1	9470 viral reads; Betacoronavirus 1 9451, Rabbit coronavirus HKU14 5 +7
+BOV-6808	false	PRJNA634678	SRA	SRR11836808	bovine nasal swab	Enterovirus E	9079 viral reads; Enterovirus E 7768, Bovine rhinitis B virus 1306 +3
+BOV-7014	false	PRJNA634678	SRA	SRR11837014	bovine nasal swab	Betacoronavirus 1	8097 viral reads; Betacoronavirus 1 8079, Ungulate copiparvovirus 1 6 +5
+BOV-6964	false	PRJNA634678	SRA	SRR11836964	bovine nasal swab	Bovine rhinitis B virus	6783 viral reads; Bovine rhinitis B virus 4999, Enterovirus E 1668 +4
+BOV-6793	false	PRJNA634678	SRA	SRR11836793	bovine nasal swab	Betacoronavirus 1	6442 viral reads; Betacoronavirus 1 6427, Bovine orthopneumovirus 4 +6
+BOV-6971	false	PRJNA634678	SRA	SRR11836971	bovine nasal swab	Betacoronavirus 1	6372 viral reads; Betacoronavirus 1 6291, Bovine rhinitis B virus 75 +3
+BOV-6992	false	PRJNA634678	SRA	SRR11836992	bovine nasal swab	Betacoronavirus 1	4624 viral reads; Betacoronavirus 1 3360, Bovine rhinitis B virus 1130 +3
+BOV-6811	false	PRJNA634678	SRA	SRR11836811	bovine nasal swab	Betacoronavirus 1	4306 viral reads; Betacoronavirus 1 4286, Enterovirus E 16 +3
+BOV-6954	false	PRJNA634678	SRA	SRR11836954	bovine nasal swab	Enterovirus E	4235 viral reads; Enterovirus E 4126, Bovine respirovirus 3 69 +4
+BOV-6786	false	PRJNA634678	SRA	SRR11836786	bovine nasal swab	Bovine rhinitis B virus	4202 viral reads; Bovine rhinitis B virus 4199, Foot-and-mouth disease virus 3
+BOV-6798	false	PRJNA634678	SRA	SRR11836798	bovine nasal swab	Betacoronavirus 1	3121 viral reads; Betacoronavirus 1 3114, Rabbit coronavirus HKU14 2 +4
+BOV-6802	false	PRJNA634678	SRA	SRR11836802	bovine nasal swab	Bovine rhinitis B virus	2703 viral reads; Bovine rhinitis B virus 2694, Enterovirus E 9
+BOV-6774	false	PRJNA634678	SRA	SRR11836774	bovine nasal swab	Bovine rhinitis B virus	2286 viral reads; Bovine rhinitis B virus 2241, Influenza D virus 20 +2
+BOV-6978	false	PRJNA634678	SRA	SRR11836978	bovine nasal swab	Bovine rhinitis B virus	2068 viral reads; Bovine rhinitis B virus 2027, Betacoronavirus 1 36 +2
+BOV-6823	false	PRJNA634678	SRA	SRR11836823	bovine nasal swab	Enterovirus E	2064 viral reads; Enterovirus E 2052, Bovine rhinitis B virus 11 +1
+BOV-6957	false	PRJNA634678	SRA	SRR11836957	bovine nasal swab	Bovine respirovirus 3	1937 viral reads; Bovine respirovirus 3 1927, Human respirovirus 3 5 +2
+BOV-6944	false	PRJNA634678	SRA	SRR11836944	bovine nasal swab	Bovine rhinitis B virus	1689 viral reads; Bovine rhinitis B virus 1663, Bovine respirovirus 3 19 +3
+BOV-6895	false	PRJNA634678	SRA	SRR11836895	bovine nasal swab	Ungulate tetraparvovirus 1	1601 viral reads; Ungulate tetraparvovirus 1 1426, Betacoronavirus 1 172 +3
+BOV-6795	false	PRJNA634678	SRA	SRR11836795	bovine nasal swab	Influenza D virus	1589 viral reads; Influenza D virus 1530, Bovine rhinitis A virus 37 +2
+BOV-6950	false	PRJNA634678	SRA	SRR11836950	bovine nasal swab	Enterovirus E	1537 viral reads; Enterovirus E 1512, Bovine respirovirus 3 21 +3
+BOV-6807	false	PRJNA634678	SRA	SRR11836807	bovine nasal swab	Bovine rhinitis B virus	1512 viral reads; Bovine rhinitis B virus 900, Pestivirus B 587 +5
+BOV-6785	false	PRJNA634678	SRA	SRR11836785	bovine nasal swab	Enterovirus E	1504 viral reads; Enterovirus E 1473, Bovine rhinitis B virus 31
+BOV-7001	false	PRJNA634678	SRA	SRR11837001	bovine nasal swab	Enterovirus E	1233 viral reads; Enterovirus E 1164, Betacoronavirus 1 58 +4
+BOV-6769	false	PRJNA634678	SRA	SRR11836769	bovine nasal swab	Betacoronavirus 1	1224 viral reads; Betacoronavirus 1 1151, Enterovirus E 38 +5
+BOV-6882	false	PRJNA634678	SRA	SRR11836882	bovine nasal swab	Bovine rhinitis B virus	1142 viral reads; Bovine rhinitis B virus 671, Pestivirus A 464 +3
+BOV-7042	false	PRJNA634678	SRA	SRR11837042	bovine nasal swab	Bovine rhinitis B virus	866 viral reads; Bovine rhinitis B virus 841, Betacoronavirus 1 18 +1
+BOV-6781	false	PRJNA634678	SRA	SRR11836781	bovine nasal swab	Bovine rhinitis B virus	859 viral reads; Bovine rhinitis B virus 851, Foot-and-mouth disease virus 6 +2
+BOV-6997	false	PRJNA634678	SRA	SRR11836997	bovine nasal swab	Enterovirus E	778 viral reads; Enterovirus E 717, Ungulate tetraparvovirus 1 60 +1
+BOV-6962	false	PRJNA634678	SRA	SRR11836962	bovine nasal swab	Enterovirus E	647 viral reads; Enterovirus E 601, Betacoronavirus 1 27 +3
+BOV-6878	false	PRJNA634678	SRA	SRR11836878	bovine nasal swab	Betacoronavirus 1	468 viral reads; Betacoronavirus 1 464, Bovine torovirus 4
+BOV-6797	false	PRJNA634678	SRA	SRR11836797	bovine nasal swab	Bovine rhinitis B virus	465 viral reads; Bovine rhinitis B virus 423, Betacoronavirus 1 31 +3
+BOV-7003	false	PRJNA634678	SRA	SRR11837003	bovine nasal swab	Bosavirus MS-2016a	465 viral reads; Bosavirus MS-2016a 300, Bovine respirovirus 3 149 +3
+BOV-6963	false	PRJNA634678	SRA	SRR11836963	bovine nasal swab	Enterovirus E	462 viral reads; Enterovirus E 444, Ungulate erythroparvovirus 1 12 +2
+BOV-6995	false	PRJNA634678	SRA	SRR11836995	bovine nasal swab	Bovine rhinitis B virus	453 viral reads; Bovine rhinitis B virus 338, Betacoronavirus 1 94 +2
+BOV-6856	false	PRJNA634678	SRA	SRR11836856	bovine nasal swab	Bovine rhinitis B virus	442 viral reads; Bovine rhinitis B virus 420, Bovine rhinitis A virus 19 +1
+BOV-6876	false	PRJNA634678	SRA	SRR11836876	bovine nasal swab	Betacoronavirus 1	423 viral reads; Betacoronavirus 1 423
+BOV-6780	false	PRJNA634678	SRA	SRR11836780	bovine nasal swab	Bovine rhinitis B virus	415 viral reads; Bovine rhinitis B virus 259, Betacoronavirus 1 124 +3
+BOV-6947	false	PRJNA634678	SRA	SRR11836947	bovine nasal swab	Bovine rhinitis B virus	396 viral reads; Bovine rhinitis B virus 373, Bovine respirovirus 3 14 +4
+BOV-6919	false	PRJNA634678	SRA	SRR11836919	bovine nasal swab	Enterovirus E	382 viral reads; Enterovirus E 381, Betacoronavirus 1 1
+BOV-6910	false	PRJNA634678	SRA	SRR11836910	bovine nasal swab	Ungulate tetraparvovirus 1	367 viral reads; Ungulate tetraparvovirus 1 234, Bovine rhinitis B virus 125 +2
+BOV-6821	false	PRJNA634678	SRA	SRR11836821	bovine nasal swab	Ungulate erythroparvovirus 1	357 viral reads; Ungulate erythroparvovirus 1 342, Ungulate tetraparvovirus 1 6 +3
+BOV-7002	false	PRJNA634678	SRA	SRR11837002	bovine nasal swab	Enterovirus E	305 viral reads; Enterovirus E 301, Betacoronavirus 1 3 +1
+BOV-7052	false	PRJNA634678	SRA	SRR11837052	bovine nasal swab	Enterovirus E	288 viral reads; Enterovirus E 206, Betacoronavirus 1 82
+BOV-6789	false	PRJNA634678	SRA	SRR11836789	bovine nasal swab	Enterovirus E	262 viral reads; Enterovirus E 231, Betacoronavirus 1 31
+BOV-6906	false	PRJNA634678	SRA	SRR11836906	bovine nasal swab	Betacoronavirus 1	253 viral reads; Betacoronavirus 1 215, Bovine rhinitis B virus 17 +2
+BOV-7035	false	PRJNA634678	SRA	SRR11837035	bovine nasal swab	Bovine rhinitis B virus	235 viral reads; Bovine rhinitis B virus 234, Human betaherpesvirus 6A 1
+BOV-6920	false	PRJNA634678	SRA	SRR11836920	bovine nasal swab	Betacoronavirus 1	200 viral reads; Betacoronavirus 1 200
+BOV-7069	false	PRJNA634678	SRA	SRR11837069	bovine nasal swab	Ungulate tetraparvovirus 1	193 viral reads; Ungulate tetraparvovirus 1 156, Bosavirus sp. 26 +3
+BOV-6776	false	PRJNA634678	SRA	SRR11836776	bovine nasal swab	Bovine rhinitis B virus	192 viral reads; Bovine rhinitis B virus 113, Betacoronavirus 1 31 +3
+BOV-6762	false	PRJNA634678	SRA	SRR11836762	bovine nasal swab	Bovine respirovirus 3	190 viral reads; Bovine respirovirus 3 118, Bovine rhinitis B virus 37 +4
+BOV-6968	false	PRJNA634678	SRA	SRR11836968	bovine nasal swab	Bovine respirovirus 3	187 viral reads; Bovine respirovirus 3 178, Bovine gammaherpesvirus 6 4 +3
+BOV-6764	false	PRJNA634678	SRA	SRR11836764	bovine nasal swab	Bovine respirovirus 3	185 viral reads; Bovine respirovirus 3 109, Enterovirus E 44 +2
+BOV-7007	false	PRJNA634678	SRA	SRR11837007	bovine nasal swab	Ungulate tetraparvovirus 1	184 viral reads; Ungulate tetraparvovirus 1 151, Enterovirus E 33
+BOV-6987	false	PRJNA634678	SRA	SRR11836987	bovine nasal swab	Enterovirus E	165 viral reads; Enterovirus E 155, Betacoronavirus 1 10
+BOV-6765	false	PRJNA634678	SRA	SRR11836765	bovine nasal swab	Bovine respirovirus 3	157 viral reads; Bovine respirovirus 3 60, Influenza D virus 55 +2
+BOV-7000	false	PRJNA634678	SRA	SRR11837000	bovine nasal swab	Enterovirus E	150 viral reads; Enterovirus E 150
+BOV-6996	false	PRJNA634678	SRA	SRR11836996	bovine nasal swab	Betacoronavirus 1	149 viral reads; Betacoronavirus 1 147, Rabbit coronavirus HKU14 1 +1
+BOV-6761	false	PRJNA634678	SRA	SRR11836761	bovine nasal swab	Bovine respirovirus 3	146 viral reads; Bovine respirovirus 3 82, Bovine rhinitis B virus 35 +5
+BOV-7030	false	PRJNA634678	SRA	SRR11837030	bovine nasal swab	Betacoronavirus 1	139 viral reads; Betacoronavirus 1 127, Ungulate tetraparvovirus 1 7 +2
+BOV-6967	false	PRJNA634678	SRA	SRR11836967	bovine nasal swab	Bovine respirovirus 3	137 viral reads; Bovine respirovirus 3 132, Enterovirus E 2 +2
+BOV-7010	false	PRJNA634678	SRA	SRR11837010	bovine nasal swab	Enterovirus E	137 viral reads; Enterovirus E 94, Betacoronavirus 1 40 +3
+BOV-6955	false	PRJNA634678	SRA	SRR11836955	bovine nasal swab	Bovine respirovirus 3	126 viral reads; Bovine respirovirus 3 50, Enterovirus E 29 +5
+BOV-6772	false	PRJNA634678	SRA	SRR11836772	bovine nasal swab	Betacoronavirus 1	120 viral reads; Betacoronavirus 1 70, Bovine rhinitis B virus 23 +2
+BOV-6814	false	PRJNA634678	SRA	SRR11836814	bovine nasal swab	Betacoronavirus 1	118 viral reads; Betacoronavirus 1 95, Enterovirus E 11 +2
+BOV-6784	false	PRJNA634678	SRA	SRR11836784	bovine nasal swab	Bovine rhinitis B virus	115 viral reads; Bovine rhinitis B virus 90, Circular genetic element sp. 12 +2
+BOV-6859	false	PRJNA634678	SRA	SRR11836859	bovine nasal swab	Betacoronavirus 1	109 viral reads; Betacoronavirus 1 91, Bovine rhinitis B virus 8 +2
+BOV-7066	false	PRJNA634678	SRA	SRR11837066	bovine nasal swab	Influenza D virus	105 viral reads; Influenza D virus 94, Bovine orthopneumovirus 8 +1
+BOV-6863	false	PRJNA634678	SRA	SRR11836863	bovine nasal swab	Bovine rhinitis B virus	104 viral reads; Bovine rhinitis B virus 55, Ungulate erythroparvovirus 1 38 +3
+BOV-6896	false	PRJNA634678	SRA	SRR11836896	bovine nasal swab	Enterovirus E	93 viral reads; Enterovirus E 91, Rhinovirus C 1 +1
+BOV-6915	false	PRJNA634678	SRA	SRR11836915	bovine nasal swab	Bovine rhinitis B virus	93 viral reads; Bovine rhinitis B virus 61, Bovine respirovirus 3 25 +2
+BOV-6867	false	PRJNA634678	SRA	SRR11836867	bovine nasal swab	Enterovirus E	88 viral reads; Enterovirus E 48, Bovine rhinitis B virus 39 +1
+BOV-6860	false	PRJNA634678	SRA	SRR11836860	bovine nasal swab	Betacoronavirus 1	86 viral reads; Betacoronavirus 1 40, Enterovirus E 29 +2
+BOV-6953	false	PRJNA634678	SRA	SRR11836953	bovine nasal swab	Bovine respirovirus 3	86 viral reads; Bovine respirovirus 3 34, Enterovirus E 27 +3
+BOV-6778	false	PRJNA634678	SRA	SRR11836778	bovine nasal swab	Bovine rhinitis B virus	85 viral reads; Bovine rhinitis B virus 73, Ungulate erythroparvovirus 1 10 +2
+BOV-6943	false	PRJNA634678	SRA	SRR11836943	bovine nasal swab	Enterovirus E	83 viral reads; Enterovirus E 57, Bovine respirovirus 3 18 +1
+BOV-6835	false	PRJNA634678	SRA	SRR11836835	bovine nasal swab	Bovine nidovirus 1	80 viral reads; Bovine nidovirus 1 77, Mimivirus LCMiAC02 1 +2
+BOV-6909	false	PRJNA634678	SRA	SRR11836909	bovine nasal swab	Bovine rhinitis B virus	74 viral reads; Bovine rhinitis B virus 29, Bosavirus sp. 22 +4
+BOV-6918	false	PRJNA634678	SRA	SRR11836918	bovine nasal swab	Enterovirus E	74 viral reads; Enterovirus E 71, Bovine respirovirus 3 2 +1
+BOV-6775	false	PRJNA634678	SRA	SRR11836775	bovine nasal swab	Betacoronavirus 1	73 viral reads; Betacoronavirus 1 25, Influenza D virus 24 +2
+BOV-6985	false	PRJNA634678	SRA	SRR11836985	bovine nasal swab	Enterovirus E	72 viral reads; Enterovirus E 60, Betacoronavirus 1 11 +1
+BOV-7006	false	PRJNA634678	SRA	SRR11837006	bovine nasal swab	Bovine rhinitis B virus	71 viral reads; Bovine rhinitis B virus 53, Betacoronavirus 1 16 +2
+BOV-6940	false	PRJNA634678	SRA	SRR11836940	bovine nasal swab	Bovine astrovirus	65 viral reads; Bovine astrovirus 37, Ungulate erythroparvovirus 1 15 +4
+BOV-6952	false	PRJNA634678	SRA	SRR11836952	bovine nasal swab	Bovine respirovirus 3	65 viral reads; Bovine respirovirus 3 30, Bovine rhinitis B virus 19 +4
+BOV-6913	false	PRJNA634678	SRA	SRR11836913	bovine nasal swab	Bovine respirovirus 3	64 viral reads; Bovine respirovirus 3 63, Human respirovirus 1 1
+BOV-6917	false	PRJNA634678	SRA	SRR11836917	bovine nasal swab	Betacoronavirus 1	63 viral reads; Betacoronavirus 1 49, Bovine rhinitis B virus 6 +3
+BOV-6976	false	PRJNA634678	SRA	SRR11836976	bovine nasal swab	Bovine rhinitis B virus	63 viral reads; Bovine rhinitis B virus 42, Betacoronavirus 1 19 +2
+BOV-6801	false	PRJNA634678	SRA	SRR11836801	bovine nasal swab	Enterovirus E	59 viral reads; Enterovirus E 39, Bovine rhinitis B virus 19 +1
+BOV-6820	false	PRJNA634678	SRA	SRR11836820	bovine nasal swab	Ungulate erythroparvovirus 1	55 viral reads; Ungulate erythroparvovirus 1 49, Enterovirus E 4 +2
+BOV-6991	false	PRJNA634678	SRA	SRR11836991	bovine nasal swab	Betacoronavirus 1	53 viral reads; Betacoronavirus 1 31, Bovine gammaherpesvirus 6 20 +2
+BOV-6805	false	PRJNA634678	SRA	SRR11836805	bovine nasal swab	Bovine rhinitis B virus	52 viral reads; Bovine rhinitis B virus 41, Enterovirus E 8 +3
+BOV-6949	false	PRJNA634678	SRA	SRR11836949	bovine nasal swab	Bovine respirovirus 3	52 viral reads; Bovine respirovirus 3 39, Bovine torovirus 5 +4
+BOV-6990	false	PRJNA634678	SRA	SRR11836990	bovine nasal swab	Bovine rhinitis B virus	51 viral reads; Bovine rhinitis B virus 43, Betacoronavirus 1 5 +3
+BOV-7029	false	PRJNA634678	SRA	SRR11837029	bovine nasal swab	Ungulate tetraparvovirus 1	51 viral reads; Ungulate tetraparvovirus 1 51
+BOV-6813	false	PRJNA634678	SRA	SRR11836813	bovine nasal swab	Bovine rhinitis B virus	48 viral reads; Bovine rhinitis B virus 20, Bovine gammaherpesvirus 6 20 +3
+BOV-6958	false	PRJNA634678	SRA	SRR11836958	bovine nasal swab	Adeno-associated dependoparvovirus B	48 viral reads; Adeno-associated dependoparvovirus B 23, Betacoronavirus 1 7 +6
+BOV-7040	false	PRJNA634678	SRA	SRR11837040	bovine nasal swab	Betacoronavirus 1	45 viral reads; Betacoronavirus 1 35, Ungulate erythroparvovirus 1 8 +1
+BOV-7067	false	PRJNA634678	SRA	SRR11837067	bovine nasal swab	Bovine orthopneumovirus	44 viral reads; Bovine orthopneumovirus 34, Influenza D virus 7 +2
+BOV-6773	false	PRJNA634678	SRA	SRR11836773	bovine nasal swab	Influenza D virus	43 viral reads; Influenza D virus 16, Bovine rhinitis B virus 11 +2
+BOV-6796	false	PRJNA634678	SRA	SRR11836796	bovine nasal swab	Betacoronavirus 1	43 viral reads; Betacoronavirus 1 18, Bovine respirovirus 3 17 +1
+BOV-6881	false	PRJNA634678	SRA	SRR11836881	bovine nasal swab	Betacoronavirus 1	41 viral reads; Betacoronavirus 1 39, Bovine torovirus 1 +1
+BOV-6979	false	PRJNA634678	SRA	SRR11836979	bovine nasal swab	Betacoronavirus 1	41 viral reads; Betacoronavirus 1 21, Bovine rhinitis B virus 16 +2
+BOV-6770	false	PRJNA634678	SRA	SRR11836770	bovine nasal swab	Bovine rhinitis B virus	40 viral reads; Bovine rhinitis B virus 19, Influenza D virus 11 +4
+BOV-7050	false	PRJNA634678	SRA	SRR11837050	bovine nasal swab	Betacoronavirus 1	40 viral reads; Betacoronavirus 1 40
+BOV-6818	false	PRJNA634678	SRA	SRR11836818	bovine nasal swab	Ungulate erythroparvovirus 1	38 viral reads; Ungulate erythroparvovirus 1 28, Enterovirus E 5 +2
+BOV-6869	false	PRJNA634678	SRA	SRR11836869	bovine nasal swab	Bovine nidovirus 1	38 viral reads; Bovine nidovirus 1 38
+BOV-6946	false	PRJNA634678	SRA	SRR11836946	bovine nasal swab	Bovine respirovirus 3	38 viral reads; Bovine respirovirus 3 26, Enterovirus E 5 +3
+BOV-6973	false	PRJNA634678	SRA	SRR11836973	bovine nasal swab	Betacoronavirus 1	37 viral reads; Betacoronavirus 1 16, Bovine rhinitis A virus 15 +2
+BOV-6980	false	PRJNA634678	SRA	SRR11836980	bovine nasal swab	Betacoronavirus 1	37 viral reads; Betacoronavirus 1 28, Bovine rhinitis B virus 5 +2
+BOV-6861	false	PRJNA634678	SRA	SRR11836861	bovine nasal swab	Betacoronavirus 1	35 viral reads; Betacoronavirus 1 20, Bovine rhinitis B virus 14 +1
+BOV-6970	false	PRJNA634678	SRA	SRR11836970	bovine nasal swab	Enterovirus E	35 viral reads; Enterovirus E 16, Bovine rhinitis B virus 16 +3
+BOV-6824	false	PRJNA634678	SRA	SRR11836824	bovine nasal swab	Bovine nidovirus 1	33 viral reads; Bovine nidovirus 1 22, Influenza C virus 10 +1
+BOV-6768	false	PRJNA634678	SRA	SRR11836768	bovine nasal swab	Influenza D virus	32 viral reads; Influenza D virus 13, Bovine rhinitis B virus 9 +2
+BOV-7025	false	PRJNA634678	SRA	SRR11837025	bovine nasal swab	Enterovirus E	32 viral reads; Enterovirus E 17, Bovine kobuvirus 10 +4
+BOV-7028	false	PRJNA634678	SRA	SRR11837028	bovine nasal swab	Bovine kobuvirus	32 viral reads; Bovine kobuvirus 17, Bovine torovirus 14 +1
+BOV-7038	false	PRJNA634678	SRA	SRR11837038	bovine nasal swab	Betacoronavirus 1	32 viral reads; Betacoronavirus 1 19, Enterovirus E 11 +1
+BOV-6864	false	PRJNA634678	SRA	SRR11836864	bovine nasal swab	Bovine rhinitis B virus	31 viral reads; Bovine rhinitis B virus 16, Ungulate erythroparvovirus 1 15
+BOV-7054	false	PRJNA634678	SRA	SRR11837054	bovine nasal swab	Betacoronavirus 1	31 viral reads; Betacoronavirus 1 20, Bovine rhinitis B virus 11
+BOV-6833	false	PRJNA634678	SRA	SRR11836833	bovine nasal swab	Ungulate bocaparvovirus 6	30 viral reads; Ungulate bocaparvovirus 6 19, Picobirnavirus TFFN-2015 11
+BOV-7041	false	PRJNA634678	SRA	SRR11837041	bovine nasal swab	Betacoronavirus 1	30 viral reads; Betacoronavirus 1 20, Bovine rhinitis B virus 10
+BOV-7044	false	PRJNA634678	SRA	SRR11837044	bovine nasal swab	Betacoronavirus 1	30 viral reads; Betacoronavirus 1 30
+BOV-6815	false	PRJNA634678	SRA	SRR11836815	bovine nasal swab	Betacoronavirus 1	29 viral reads; Betacoronavirus 1 16, Enterovirus E 8 +3
+BOV-6998	false	PRJNA634678	SRA	SRR11836998	bovine nasal swab	Bovine rhinitis B virus	29 viral reads; Bovine rhinitis B virus 20, Enterovirus E 2 +5
+BOV-6794	false	PRJNA634678	SRA	SRR11836794	bovine nasal swab	Betacoronavirus 1	28 viral reads; Betacoronavirus 1 25, Influenza D virus 2 +1
+BOV-6862	false	PRJNA634678	SRA	SRR11836862	bovine nasal swab	Bovine rhinitis B virus	28 viral reads; Bovine rhinitis B virus 28
+BOV-6922	false	PRJNA634678	SRA	SRR11836922	bovine nasal swab	Enterovirus E	28 viral reads; Enterovirus E 25, Bovine respirovirus 3 1 +2
+BOV-6972	false	PRJNA634678	SRA	SRR11836972	bovine nasal swab	Betacoronavirus 1	28 viral reads; Betacoronavirus 1 23, Influenza D virus 3 +1
+BOV-7015	false	PRJNA634678	SRA	SRR11837015	bovine nasal swab	Enterovirus E	28 viral reads; Enterovirus E 27, Human betaherpesvirus 6A 1
+BOV-6942	false	PRJNA634678	SRA	SRR11836942	bovine nasal swab	Bovine respirovirus 3	27 viral reads; Bovine respirovirus 3 20, Bovine rhinitis B virus 5 +2
+BOV-6983	false	PRJNA634678	SRA	SRR11836983	bovine nasal swab	Bovine rhinitis B virus	27 viral reads; Bovine rhinitis B virus 21, Betacoronavirus 1 4 +1
+BOV-6986	false	PRJNA634678	SRA	SRR11836986	bovine nasal swab	Betacoronavirus 1	27 viral reads; Betacoronavirus 1 25, Pasteurella phage PHB02 1 +1
+BOV-6945	false	PRJNA634678	SRA	SRR11836945	bovine nasal swab	Bovine respirovirus 3	26 viral reads; Bovine respirovirus 3 23, Enterovirus E 3
+BOV-7039	false	PRJNA634678	SRA	SRR11837039	bovine nasal swab	Betacoronavirus 1	26 viral reads; Betacoronavirus 1 25, Bovine rhinitis B virus 1
+BOV-7047	false	PRJNA634678	SRA	SRR11837047	bovine nasal swab	Betacoronavirus 1	26 viral reads; Betacoronavirus 1 14, Bovine rhinitis B virus 8 +2
+BOV-6804	false	PRJNA634678	SRA	SRR11836804	bovine nasal swab	Bovine rhinitis B virus	25 viral reads; Bovine rhinitis B virus 14, Inoviridae sp. 5 +3
+BOV-6809	false	PRJNA634678	SRA	SRR11836809	bovine nasal swab	Bovine rhinitis B virus	24 viral reads; Bovine rhinitis B virus 20, Enterovirus E 2 +2
+BOV-7045	false	PRJNA634678	SRA	SRR11837045	bovine nasal swab	Betacoronavirus 1	24 viral reads; Betacoronavirus 1 24
+BOV-6868	false	PRJNA634678	SRA	SRR11836868	bovine nasal swab	Bovine rhinitis B virus	23 viral reads; Bovine rhinitis B virus 22, Ungulate erythroparvovirus 1 1
+BOV-6921	false	PRJNA634678	SRA	SRR11836921	bovine nasal swab	Bovine rhinitis B virus	23 viral reads; Bovine rhinitis B virus 20, Bovine respirovirus 3 2 +1
+BOV-7060	false	PRJNA634678	SRA	SRR11837060	bovine nasal swab	Ungulate bocaparvovirus 6	23 viral reads; Ungulate bocaparvovirus 6 23
+BOV-6916	false	PRJNA634678	SRA	SRR11836916	bovine nasal swab	Bovine rhinitis B virus	22 viral reads; Bovine rhinitis B virus 22
+BOV-6974	false	PRJNA634678	SRA	SRR11836974	bovine nasal swab	Betacoronavirus 1	22 viral reads; Betacoronavirus 1 20, Human betaherpesvirus 6A 1 +1
+BOV-7058	false	PRJNA634678	SRA	SRR11837058	bovine nasal swab	Betacoronavirus 1	22 viral reads; Betacoronavirus 1 22
+BOV-6791	false	PRJNA634678	SRA	SRR11836791	bovine nasal swab	Betacoronavirus 1	21 viral reads; Betacoronavirus 1 20, Influenza D virus 1
+BOV-6937	false	PRJNA634678	SRA	SRR11836937	bovine nasal swab	Ungulate tetraparvovirus 1	21 viral reads; Ungulate tetraparvovirus 1 21
+BOV-6790	false	PRJNA634678	SRA	SRR11836790	bovine nasal swab	Betacoronavirus 1	20 viral reads; Betacoronavirus 1 19, Enterovirus E 1
+BOV-6826	false	PRJNA634678	SRA	SRR11836826	bovine nasal swab	Ungulate erythroparvovirus 1	20 viral reads; Ungulate erythroparvovirus 1 20
+BOV-6838	false	PRJNA634678	SRA	SRR11836838	bovine nasal swab	Bovine nidovirus 1	20 viral reads; Bovine nidovirus 1 12, Ungulate erythroparvovirus 1 8
+BOV-7022	false	PRJNA634678	SRA	SRR11837022	bovine nasal swab	Bovine kobuvirus	20 viral reads; Bovine kobuvirus 16, Bovine rhinitis B virus 4
+BOV-7057	false	PRJNA634678	SRA	SRR11837057	bovine nasal swab	Betacoronavirus 1	20 viral reads; Betacoronavirus 1 14, Ungulate bocaparvovirus 6 6
+BOV-6865	false	PRJNA634678	SRA	SRR11836865	bovine nasal swab	Bovine rhinitis B virus	19 viral reads; Bovine rhinitis B virus 16, Enterovirus E 2 +1
+BOV-6880	false	PRJNA634678	SRA	SRR11836880	bovine nasal swab	Bovine nidovirus 1	19 viral reads; Bovine nidovirus 1 19
+BOV-7056	false	PRJNA634678	SRA	SRR11837056	bovine nasal swab	Betacoronavirus 1	19 viral reads; Betacoronavirus 1 19
+BOV-6975	false	PRJNA634678	SRA	SRR11836975	bovine nasal swab	Betacoronavirus 1	18 viral reads; Betacoronavirus 1 17, Bovine rhinitis B virus 1
+BOV-6822	false	PRJNA634678	SRA	SRR11836822	bovine nasal swab	Bovine nidovirus 1	17 viral reads; Bovine nidovirus 1 17
+BOV-6834	false	PRJNA634678	SRA	SRR11836834	bovine nasal swab	Enterovirus E	17 viral reads; Enterovirus E 16, Murine leukemia virus 1
+BOV-7046	false	PRJNA634678	SRA	SRR11837046	bovine nasal swab	Betacoronavirus 1	17 viral reads; Betacoronavirus 1 13, Bovine rhinitis B virus 4
+BOV-7055	false	PRJNA634678	SRA	SRR11837055	bovine nasal swab	Betacoronavirus 1	17 viral reads; Betacoronavirus 1 17
+BOV-6779	false	PRJNA634678	SRA	SRR11836779	bovine nasal swab	Bovine rhinitis B virus	16 viral reads; Bovine rhinitis B virus 15, Human respirovirus 1 1
+BOV-6982	false	PRJNA634678	SRA	SRR11836982	bovine nasal swab	Ungulate erythroparvovirus 1	16 viral reads; Ungulate erythroparvovirus 1 13, Betacoronavirus 1 2 +1
+BOV-7037	false	PRJNA634678	SRA	SRR11837037	bovine nasal swab	Ungulate erythroparvovirus 1	16 viral reads; Ungulate erythroparvovirus 1 15, Bovine rhinitis B virus 1
+BOV-6850	false	PRJNA634678	SRA	SRR11836850	bovine nasal swab	Influenza D virus	15 viral reads; Influenza D virus 15
+BOV-6877	false	PRJNA634678	SRA	SRR11836877	bovine nasal swab	Betacoronavirus 1	15 viral reads; Betacoronavirus 1 14, Human respirovirus 1 1
+BOV-6961	false	PRJNA634678	SRA	SRR11836961	bovine nasal swab	Bovine kobuvirus	15 viral reads; Bovine kobuvirus 4, Betacoronavirus 1 4 +4
+BOV-6831	false	PRJNA634678	SRA	SRR11836831	bovine nasal swab	Bovine rhinitis B virus	14 viral reads; Bovine rhinitis B virus 14
+BOV-6852	false	PRJNA634678	SRA	SRR11836852	bovine nasal swab	Bovine rhinitis B virus	14 viral reads; Bovine rhinitis B virus 13, Bosavirus sp. 1
+BOV-6892	false	PRJNA634678	SRA	SRR11836892	bovine nasal swab	Ungulate erythroparvovirus 1	14 viral reads; Ungulate erythroparvovirus 1 13, Bovine kobuvirus 1
+BOV-6941	false	PRJNA634678	SRA	SRR11836941	bovine nasal swab	Bovine respirovirus 3	14 viral reads; Bovine respirovirus 3 12, Enterovirus E 1 +1
+BOV-6800	false	PRJNA634678	SRA	SRR11836800	bovine nasal swab	Bovine rhinitis B virus	13 viral reads; Bovine rhinitis B virus 8, Enterovirus E 4 +1
+BOV-6816	false	PRJNA634678	SRA	SRR11836816	bovine nasal swab	Enterovirus E	13 viral reads; Enterovirus E 6, Bovine rhinitis B virus 5 +1
+BOV-6923	false	PRJNA634678	SRA	SRR11836923	bovine nasal swab	Enterovirus E	13 viral reads; Enterovirus E 9, uncultured Mediterranean phage 1 +3
+BOV-6993	false	PRJNA634678	SRA	SRR11836993	bovine nasal swab	Betacoronavirus 1	13 viral reads; Betacoronavirus 1 6, Bovine rhinitis A virus 4 +3
+BOV-6846	false	PRJNA634678	SRA	SRR11836846	bovine nasal swab	Ungulate tetraparvovirus 1	12 viral reads; Ungulate tetraparvovirus 1 5, Bovine nidovirus 1 5 +2
+BOV-6907	false	PRJNA634678	SRA	SRR11836907	bovine nasal swab	Bovine rhinitis B virus	12 viral reads; Bovine rhinitis B virus 12
+BOV-6965	false	PRJNA634678	SRA	SRR11836965	bovine nasal swab	Bovine rhinitis B virus	12 viral reads; Bovine rhinitis B virus 6, Bovine kobuvirus 3 +1
+BOV-6999	false	PRJNA634678	SRA	SRR11836999	bovine nasal swab	Pasteurella phage PHB02	12 viral reads; Pasteurella phage PHB02 6, Enterovirus E 5 +1
+BOV-6788	false	PRJNA634678	SRA	SRR11836788	bovine nasal swab	Betacoronavirus 1	11 viral reads; Betacoronavirus 1 8, Human betaherpesvirus 6A 1 +2
+BOV-6803	false	PRJNA634678	SRA	SRR11836803	bovine nasal swab	Bovine rhinitis B virus	11 viral reads; Bovine rhinitis B virus 8, Enterovirus E 3
+BOV-6871	false	PRJNA634678	SRA	SRR11836871	bovine nasal swab	Bovine rhinitis B virus	11 viral reads; Bovine rhinitis B virus 8, Human respirovirus 1 1 +2
+BOV-6817	false	PRJNA634678	SRA	SRR11836817	bovine nasal swab	Enterovirus E	10 viral reads; Enterovirus E 5, Betacoronavirus 1 3 +1
+BOV-6988	false	PRJNA634678	SRA	SRR11836988	bovine nasal swab	Betacoronavirus 1	10 viral reads; Betacoronavirus 1 8, Picobirnavirus TFFN-2015 1 +1
+BOV-7011	false	PRJNA634678	SRA	SRR11837011	bovine nasal swab	Betacoronavirus 1	10 viral reads; Betacoronavirus 1 10
+BOV-7019	false	PRJNA634678	SRA	SRR11837019	bovine nasal swab	Ungulate tetraparvovirus 1	10 viral reads; Ungulate tetraparvovirus 1 10
+BOV-6872	false	PRJNA634678	SRA	SRR11836872	bovine nasal swab	Human respirovirus 1	9 viral reads; Human respirovirus 1 5, Kammavanpettai virus 1 +3
+BOV-6929	false	PRJNA634678	SRA	SRR11836929	bovine nasal swab	Betacoronavirus 1	9 viral reads; Betacoronavirus 1 9
+BOV-6951	false	PRJNA634678	SRA	SRR11836951	bovine nasal swab	Betacoronavirus 1	9 viral reads; Betacoronavirus 1 9
+BOV-7018	false	PRJNA634678	SRA	SRR11837018	bovine nasal swab	Bovine rhinitis B virus	9 viral reads; Bovine rhinitis B virus 8, Betacoronavirus 1 1
+BOV-7059	false	PRJNA634678	SRA	SRR11837059	bovine nasal swab	Bovine nidovirus 1	9 viral reads; Bovine nidovirus 1 9
+BOV-6810	false	PRJNA634678	SRA	SRR11836810	bovine nasal swab	Betacoronavirus 1	8 viral reads; Betacoronavirus 1 6, Ungulate tetraparvovirus 1 1 +1
+BOV-6887	false	PRJNA634678	SRA	SRR11836887	bovine nasal swab	Kammavanpettai virus	8 viral reads; Kammavanpettai virus 4, Bovine astrovirus 2 +2
+BOV-6908	false	PRJNA634678	SRA	SRR11836908	bovine nasal swab	Bovine rhinitis B virus	8 viral reads; Bovine rhinitis B virus 6, Bovine kobuvirus 2
+BOV-7063	false	PRJNA634678	SRA	SRR11837063	bovine nasal swab	Bovine rhinitis B virus	8 viral reads; Bovine rhinitis B virus 5, Human respirovirus 1 2 +1
+BOV-6851	false	PRJNA634678	SRA	SRR11836851	bovine nasal swab	Ungulate copiparvovirus 1	7 viral reads; Ungulate copiparvovirus 1 7
+BOV-6870	false	PRJNA634678	SRA	SRR11836870	bovine nasal swab	Ungulate tetraparvovirus 1	7 viral reads; Ungulate tetraparvovirus 1 6, Human respirovirus 1 1
+BOV-6938	false	PRJNA634678	SRA	SRR11836938	bovine nasal swab	Ungulate tetraparvovirus 1	7 viral reads; Ungulate tetraparvovirus 1 5, Enterovirus E 2
+BOV-6959	false	PRJNA634678	SRA	SRR11836959	bovine nasal swab	Bovine respirovirus 3	7 viral reads; Bovine respirovirus 3 5, Human respirovirus 1 1 +1
+BOV-7009	false	PRJNA634678	SRA	SRR11837009	bovine nasal swab	Bovine rhinitis B virus	7 viral reads; Bovine rhinitis B virus 7
+BOV-6819	false	PRJNA634678	SRA	SRR11836819	bovine nasal swab	Enterovirus E	6 viral reads; Enterovirus E 4, Betacoronavirus 1 2
+BOV-6840	false	PRJNA634678	SRA	SRR11836840	bovine nasal swab	Betacoronavirus 1	6 viral reads; Betacoronavirus 1 6
+BOV-6873	false	PRJNA634678	SRA	SRR11836873	bovine nasal swab	Kammavanpettai virus	6 viral reads; Kammavanpettai virus 3, Human respirovirus 1 2 +1
+BOV-6966	false	PRJNA634678	SRA	SRR11836966	bovine nasal swab	Bovine rhinitis B virus	6 viral reads; Bovine rhinitis B virus 2, Bovine respirovirus 3 2 +2
+BOV-6994	false	PRJNA634678	SRA	SRR11836994	bovine nasal swab	Betacoronavirus 1	6 viral reads; Betacoronavirus 1 6
+BOV-7005	false	PRJNA634678	SRA	SRR11837005	bovine nasal swab	Betacoronavirus 1	6 viral reads; Betacoronavirus 1 6
+BOV-7013	false	PRJNA634678	SRA	SRR11837013	bovine nasal swab	Enterovirus E	6 viral reads; Enterovirus E 5, Bovine rhinitis B virus 1
+BOV-7053	false	PRJNA634678	SRA	SRR11837053	bovine nasal swab	Betacoronavirus 1	6 viral reads; Betacoronavirus 1 4, Propionibacterium virus P104A 1 +1
+BOV-6766	false	PRJNA634678	SRA	SRR11836766	bovine nasal swab	Betacoronavirus 1	5 viral reads; Betacoronavirus 1 4, Streptococcus phage Javan226 1
+BOV-6825	false	PRJNA634678	SRA	SRR11836825	bovine nasal swab	Bovine kobuvirus	5 viral reads; Bovine kobuvirus 3, Bovine rhinitis B virus 2
+BOV-6855	false	PRJNA634678	SRA	SRR11836855	bovine nasal swab	Ungulate tetraparvovirus 1	5 viral reads; Ungulate tetraparvovirus 1 4, Ungulate erythroparvovirus 1 1
+BOV-6875	false	PRJNA634678	SRA	SRR11836875	bovine nasal swab	Human respirovirus 1	5 viral reads; Human respirovirus 1 4, Kammavanpettai virus 1
+BOV-6900	false	PRJNA634678	SRA	SRR11836900	bovine nasal swab	Bovine gammaherpesvirus 6	5 viral reads; Bovine gammaherpesvirus 6 4, Siphoviridae sp. 1
+BOV-6912	false	PRJNA634678	SRA	SRR11836912	bovine nasal swab	Human respirovirus 1	5 viral reads; Human respirovirus 1 2, Bovine rhinitis B virus 2 +1
+BOV-6969	false	PRJNA634678	SRA	SRR11836969	bovine nasal swab	Bovine rhinitis B virus	5 viral reads; Bovine rhinitis B virus 2, Kammavanpettai virus 1 +2
+BOV-7004	false	PRJNA634678	SRA	SRR11837004	bovine nasal swab	Betacoronavirus 1	5 viral reads; Betacoronavirus 1 4, Enterovirus E 1
+BOV-7036	false	PRJNA634678	SRA	SRR11837036	bovine nasal swab	Ungulate erythroparvovirus 1	5 viral reads; Ungulate erythroparvovirus 1 4, Bovine rhinitis B virus 1
+BOV-7049	false	PRJNA634678	SRA	SRR11837049	bovine nasal swab	Betacoronavirus 1	5 viral reads; Betacoronavirus 1 5
+BOV-6827	false	PRJNA634678	SRA	SRR11836827	bovine nasal swab	Bosavirus MS-2016a	4 viral reads; Bosavirus MS-2016a 3, Human respirovirus 1 1
+BOV-6832	false	PRJNA634678	SRA	SRR11836832	bovine nasal swab	Human respirovirus 1	4 viral reads; Human respirovirus 1 3, Human betaherpesvirus 6A 1
+BOV-6898	false	PRJNA634678	SRA	SRR11836898	bovine nasal swab	Rotavirus A	4 viral reads; Rotavirus A 1, Enterovirus E 1 +2
+BOV-6984	false	PRJNA634678	SRA	SRR11836984	bovine nasal swab	Betacoronavirus 1	4 viral reads; Betacoronavirus 1 4
+BOV-6777	false	PRJNA634678	SRA	SRR11836777	bovine nasal swab	Betacoronavirus 1	3 viral reads; Betacoronavirus 1 2, Bovine rhinitis B virus 1
+BOV-6799	false	PRJNA634678	SRA	SRR11836799	bovine nasal swab	Betacoronavirus 1	3 viral reads; Betacoronavirus 1 2, Ungulate erythroparvovirus 1 1
+BOV-6885	false	PRJNA634678	SRA	SRR11836885	bovine nasal swab	Bovine rhinitis B virus	3 viral reads; Bovine rhinitis B virus 2, Pestivirus A 1
+BOV-6899	false	PRJNA634678	SRA	SRR11836899	bovine nasal swab	Bovine rhinitis B virus	3 viral reads; Bovine rhinitis B virus 2, Ungulate copiparvovirus 1 1
+BOV-6911	false	PRJNA634678	SRA	SRR11836911	bovine nasal swab	Human respirovirus 1	3 viral reads; Human respirovirus 1 2, Ungulate tetraparvovirus 1 1
+BOV-6933	false	PRJNA634678	SRA	SRR11836933	bovine nasal swab	Ungulate tetraparvovirus 1	3 viral reads; Ungulate tetraparvovirus 1 3
+BOV-6935	false	PRJNA634678	SRA	SRR11836935	bovine nasal swab	Human respirovirus 1	3 viral reads; Human respirovirus 1 3
+BOV-6981	false	PRJNA634678	SRA	SRR11836981	bovine nasal swab	Betacoronavirus 1	3 viral reads; Betacoronavirus 1 3
+BOV-7016	false	PRJNA634678	SRA	SRR11837016	bovine nasal swab	Enterovirus E	3 viral reads; Enterovirus E 1, Bovine torovirus 1 +1
+BOV-7065	false	PRJNA634678	SRA	SRR11837065	bovine nasal swab	Bosavirus MS-2016a	3 viral reads; Bosavirus MS-2016a 2, Influenza D virus 1
+BOV-6845	false	PRJNA634678	SRA	SRR11836845	bovine nasal swab	Arthrobacter virus Circum	2 viral reads; Arthrobacter virus Circum 2
+BOV-6848	false	PRJNA634678	SRA	SRR11836848	bovine nasal swab	Ungulate tetraparvovirus 1	2 viral reads; Ungulate tetraparvovirus 1 2
+BOV-6879	false	PRJNA634678	SRA	SRR11836879	bovine nasal swab	Bovine rhinitis B virus	2 viral reads; Bovine rhinitis B virus 2
+BOV-6883	false	PRJNA634678	SRA	SRR11836883	bovine nasal swab	Kammavanpettai virus	2 viral reads; Kammavanpettai virus 1, Human respirovirus 1 1
+BOV-6884	false	PRJNA634678	SRA	SRR11836884	bovine nasal swab	Human respirovirus 1	2 viral reads; Human respirovirus 1 1, Bovine rhinitis B virus 1
+BOV-6886	false	PRJNA634678	SRA	SRR11836886	bovine nasal swab	Pasteurella phage PHB01	2 viral reads; Pasteurella phage PHB01 2
+BOV-6888	false	PRJNA634678	SRA	SRR11836888	bovine nasal swab	Shamonda orthobunyavirus	2 viral reads; Shamonda orthobunyavirus 1, Caribou associated gemykrogvirus 1 1
+BOV-6889	false	PRJNA634678	SRA	SRR11836889	bovine nasal swab	Kammavanpettai virus	2 viral reads; Kammavanpettai virus 1, Human respirovirus 1 1
+BOV-6890	false	PRJNA634678	SRA	SRR11836890	bovine nasal swab	Human respirovirus 1	2 viral reads; Human respirovirus 1 2
+BOV-6902	false	PRJNA634678	SRA	SRR11836902	bovine nasal swab	Pasteurella phage PHB02	2 viral reads; Pasteurella phage PHB02 2
+BOV-6904	false	PRJNA634678	SRA	SRR11836904	bovine nasal swab	Bovine rhinitis B virus	2 viral reads; Bovine rhinitis B virus 1, Bovine kobuvirus 1
+BOV-6914	false	PRJNA634678	SRA	SRR11836914	bovine nasal swab	Human respirovirus 1	2 viral reads; Human respirovirus 1 2
+BOV-6936	false	PRJNA634678	SRA	SRR11836936	bovine nasal swab	Lactococcus phage vB_LLc_bIBB14	2 viral reads; Lactococcus phage vB_LLc_bIBB14 1, Human betaherpesvirus 6A 1
+BOV-6956	false	PRJNA634678	SRA	SRR11836956	bovine nasal swab	Bovine respirovirus 3	2 viral reads; Bovine respirovirus 3 2
+BOV-7012	false	PRJNA634678	SRA	SRR11837012	bovine nasal swab	Bovine rhinitis B virus	2 viral reads; Bovine rhinitis B virus 2
+BOV-7017	false	PRJNA634678	SRA	SRR11837017	bovine nasal swab	Enterovirus E	2 viral reads; Enterovirus E 2
+BOV-7031	false	PRJNA634678	SRA	SRR11837031	bovine nasal swab	unidentified circular ssDNA virus	2 viral reads; unidentified circular ssDNA virus 1, Ungulate erythroparvovirus 1 1
+BOV-7034	false	PRJNA634678	SRA	SRR11837034	bovine nasal swab	Human betaherpesvirus 6A	2 viral reads; Human betaherpesvirus 6A 2
+BOV-7048	false	PRJNA634678	SRA	SRR11837048	bovine nasal swab	Bovine orthopneumovirus	2 viral reads; Bovine orthopneumovirus 2
+BOV-7068	false	PRJNA634678	SRA	SRR11837068	bovine nasal swab	Kammavanpettai virus	2 viral reads; Kammavanpettai virus 1, Human respirovirus 1 1
+BOV-6828	false	PRJNA634678	SRA	SRR11836828	bovine nasal swab	Ungulate bocaparvovirus 6	1 viral reads; Ungulate bocaparvovirus 6 1
+BOV-6843	false	PRJNA634678	SRA	SRR11836843	bovine nasal swab	Ungulate erythroparvovirus 1	1 viral reads; Ungulate erythroparvovirus 1 1
+BOV-6849	false	PRJNA634678	SRA	SRR11836849	bovine nasal swab	Bovine rhinitis B virus	1 viral reads; Bovine rhinitis B virus 1
+BOV-6901	false	PRJNA634678	SRA	SRR11836901	bovine nasal swab	Human betaherpesvirus 6A	1 viral reads; Human betaherpesvirus 6A 1
+BOV-6924	false	PRJNA634678	SRA	SRR11836924	bovine nasal swab	Pandoravirus inopinatum	1 viral reads; Pandoravirus inopinatum 1
+BOV-6926	false	PRJNA634678	SRA	SRR11836926	bovine nasal swab	Bosavirus MS-2016a	1 viral reads; Bosavirus MS-2016a 1
+BOV-6927	false	PRJNA634678	SRA	SRR11836927	bovine nasal swab	Ungulate tetraparvovirus 1	1 viral reads; Ungulate tetraparvovirus 1 1
+BOV-6928	false	PRJNA634678	SRA	SRR11836928	bovine nasal swab	Microviridae sp.	1 viral reads; Microviridae sp. 1
+BOV-6930	false	PRJNA634678	SRA	SRR11836930	bovine nasal swab	Ungulate tetraparvovirus 1	1 viral reads; Ungulate tetraparvovirus 1 1
+BOV-6932	false	PRJNA634678	SRA	SRR11836932	bovine nasal swab	Human betaherpesvirus 6A	1 viral reads; Human betaherpesvirus 6A 1
+BOV-6934	false	PRJNA634678	SRA	SRR11836934	bovine nasal swab	Ungulate tetraparvovirus 1	1 viral reads; Ungulate tetraparvovirus 1 1
+BOV-6939	false	PRJNA634678	SRA	SRR11836939	bovine nasal swab	Ungulate tetraparvovirus 1	1 viral reads; Ungulate tetraparvovirus 1 1
+BOV-7008	false	PRJNA634678	SRA	SRR11837008	bovine nasal swab	Pasteurella phage PHB01	1 viral reads; Pasteurella phage PHB01 1
+BOV-7021	false	PRJNA634678	SRA	SRR11837021	bovine nasal swab	Bovine rhinitis B virus	1 viral reads; Bovine rhinitis B virus 1
+BOV-7024	false	PRJNA634678	SRA	SRR11837024	bovine nasal swab	Bovine kobuvirus	1 viral reads; Bovine kobuvirus 1
+BOV-7027	false	PRJNA634678	SRA	SRR11837027	bovine nasal swab	Human respirovirus 1	1 viral reads; Human respirovirus 1 1
+BOV-7032	false	PRJNA634678	SRA	SRR11837032	bovine nasal swab	Human respirovirus 1	1 viral reads; Human respirovirus 1 1
+BOV-7061	false	PRJNA634678	SRA	SRR11837061	bovine nasal swab	Finch associated genomovirus 7	1 viral reads; Finch associated genomovirus 7 1
+BOV-7064	false	PRJNA634678	SRA	SRR11837064	bovine nasal swab	Tomato leaf curl Joydebpur betasatellite	1 viral reads; Tomato leaf curl Joydebpur betasatellite 1
