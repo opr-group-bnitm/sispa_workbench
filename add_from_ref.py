@@ -3,7 +3,8 @@
 
 Every read with a primary minimap2 alignment to REFERENCE is written, unchanged,
 to data/<category>_reads/FILENAME, and the file is registered in
-data/organisms.tsv under ORGANISM_ID (see sync_reads.py).
+data/organisms.tsv under ORGANISM_ID (see sync_reads.py), together with the
+reference and the input FASTQ(s) it came from.
 
 minimap2 runs with the settings of the vimop pipeline
 (https://github.com/opr-group-bnitm/vimop): -x map-ont --secondary=no, plus
@@ -106,6 +107,15 @@ def mapped_read_names(
     }
 
 
+def data_relative(path: Path, data_dir: Path) -> str:
+    """path relative to data_dir when it lies inside it, else absolute."""
+    path = path.resolve()
+    try:
+        return path.relative_to(data_dir.resolve()).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def resolve_reference(reference: str, data_dir: Path) -> Path:
     path = Path(reference)
     if path.exists():
@@ -205,7 +215,11 @@ def run(args) -> int:
         split_dir.cleanup()
 
     print(f"[written] {out_path} ({n_out} of {n_in} reads, {100 * n_out / n_in:.2f}%)")
-    sync_reads(data_dir, explicit_ids={rel_name: args.organism_id})
+    source = (
+        data_relative(reference, data_dir),
+        ";".join(data_relative(fastq, data_dir) for fastq in args.fastq),
+    )
+    sync_reads(data_dir, explicit_ids={rel_name: args.organism_id}, sources={rel_name: source})
     return 0
 
 

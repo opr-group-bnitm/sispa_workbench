@@ -6,6 +6,11 @@ read statistics. ``filename`` is relative to the data directory, e.g.
 without the FASTQ suffix; an id given explicitly (by add_from_ref.py, or by
 editing the table) is kept on later syncs.
 
+``reference`` and ``source_fastq`` record where add_from_ref.py took the reads
+from: the reference they were mapped to and the FASTQ(s) they were extracted
+from (';'-separated), relative to the data directory when inside it. They are
+empty for files added by hand, and kept on later syncs like explicit ids.
+
 Read statistics are cached in data/.organisms_cache.tsv together with each
 file's size and modification time, so a sync only reads files that are new or
 have changed since the last one.
@@ -23,7 +28,10 @@ from typing import Callable, Dict, List, Mapping, Optional, Tuple
 from .fastq import FastqStats, fastq_stats, is_fastq, strip_fastq_suffix
 from .paths import ORGANISMS_TSV, READ_CATEGORIES, SYNC_CACHE, reads_dir
 
-COLUMNS = ["organism_id", "filename", "avg_read_length", "max_read_length", "min_read_length", "n_reads"]
+COLUMNS = [
+    "organism_id", "filename", "avg_read_length", "max_read_length", "min_read_length", "n_reads",
+    "reference", "source_fastq",
+]
 CACHE_COLUMNS = ["filename", "size", "mtime_ns", "n_reads", "min_read_length", "max_read_length", "total_bases"]
 
 # ids are used unquoted in composition lists ("COVID 5000, human all") and in
@@ -43,6 +51,8 @@ class Organism:
     max_read_length: int
     min_read_length: int
     n_reads: int
+    reference: str = ""
+    source_fastq: str = ""
 
     def path(self, data_dir: Path) -> Path:
         return data_dir / self.filename
@@ -70,6 +80,8 @@ def load_organisms(data_dir: Path) -> List[Organism]:
                 max_read_length=int(row["max_read_length"]),
                 min_read_length=int(row["min_read_length"]),
                 n_reads=int(row["n_reads"]),
+                reference=row.get("reference") or "",
+                source_fastq=row.get("source_fastq") or "",
             )
             for row in csv.DictReader(fh, delimiter="\t")
         ]
@@ -89,7 +101,10 @@ def write_organisms(data_dir: Path, organisms: List[Organism]) -> None:
         data_dir / ORGANISMS_TSV,
         COLUMNS,
         [
-            [o.organism_id, o.filename, f"{o.avg_read_length:.2f}", o.max_read_length, o.min_read_length, o.n_reads]
+            [
+                o.organism_id, o.filename, f"{o.avg_read_length:.2f}", o.max_read_length,
+                o.min_read_length, o.n_reads, o.reference, o.source_fastq,
+            ]
             for o in organisms
         ],
     )
@@ -142,15 +157,18 @@ def scan_read_files(data_dir: Path) -> List[str]:
 def sync_reads(
     data_dir: Path,
     explicit_ids: Optional[Mapping[str, str]] = None,
+    sources: Optional[Mapping[str, Tuple[str, str]]] = None,
     rescan: bool = False,
     log: Callable[[str], None] = print,
 ) -> List[Organism]:
     """Bring organisms.tsv in line with the FASTQs on disk and return its rows.
 
     explicit_ids maps a filename (relative to data_dir) to the organism_id it
-    should get instead of the default one.
+    should get instead of the default one, and sources maps it to the
+    (reference, source_fastq) its reads were extracted with.
     """
     explicit_ids = dict(explicit_ids or {})
+    sources = dict(sources or {})
     for category in READ_CATEGORIES:
         reads_dir(data_dir, category).mkdir(parents=True, exist_ok=True)
 
@@ -182,9 +200,16 @@ def sync_reads(
             stats = fastq_stats(data_dir / filename)
         new_cache[filename] = (fingerprint, stats)
 
+        if filename in sources:
+            reference, source_fastq = sources[filename]
+        elif filename in existing:
+            reference, source_fastq = existing[filename].reference, existing[filename].source_fastq
+        else:
+            reference, source_fastq = "", ""
         row = Organism(
             organism_id, filename, round(stats.avg_read_length, 2),
             stats.max_read_length, stats.min_read_length, stats.n_reads,
+            reference, source_fastq,
         )
         if filename not in existing:
             added.append(row)

@@ -76,7 +76,18 @@ def test_sync_registers_files(data_dir):
     assert (covid.n_reads, covid.min_read_length, covid.max_read_length) == (50, 4, 200)
     assert covid.avg_read_length == pytest.approx(102.0)
     header = (data_dir / "organisms.tsv").read_text().splitlines()[0].split("\t")
-    assert header == ["organism_id", "filename", "avg_read_length", "max_read_length", "min_read_length", "n_reads"]
+    assert header == ["organism_id", "filename", "avg_read_length", "max_read_length", "min_read_length", "n_reads",
+                      "reference", "source_fastq"]
+    assert (covid.reference, covid.source_fastq) == ("", "")
+
+
+def test_sync_reads_old_table_without_source_columns(data_dir):
+    (data_dir / "organisms.tsv").write_text(
+        "organism_id\tfilename\tavg_read_length\tmax_read_length\tmin_read_length\tn_reads\n"
+        "Lassa\tvirus_reads/LASV.fq\t12.00\t12\t12\t20\n"
+    )
+    assert sync_reads.main(["--data-dir", str(data_dir)]) == 0
+    assert organisms(data_dir)["Lassa"].reference == ""
 
 
 def test_sync_only_reads_changed_files(data_dir, capsys):
@@ -259,9 +270,15 @@ def test_add_from_ref_extracts_mapped_reads(data_dir, fake_minimap2, mixed_fastq
     orgs = organisms(data_dir)
     assert orgs["DENV2"].filename == "virus_reads/dengue.fastq.gz" and orgs["DENV2"].n_reads == 4
 
-    # the explicit id survives later syncs
+    # reference and inputs are recorded, relative to the data dir when inside it
+    assert orgs["DENV2"].reference == "references/ref.fasta"
+    assert orgs["DENV2"].source_fastq == str(mixed_fastq.resolve())
+
+    # the explicit id and the sources survive later syncs
     sync_reads.main(["--data-dir", str(data_dir)])
-    assert "DENV2" in organisms(data_dir) and "dengue" not in organisms(data_dir)
+    orgs = organisms(data_dir)
+    assert "DENV2" in orgs and "dengue" not in orgs
+    assert orgs["DENV2"].reference == "references/ref.fasta"
 
 
 def test_add_from_ref_filters(data_dir, fake_minimap2, mixed_fastq):
@@ -274,6 +291,10 @@ def test_add_from_ref_several_inputs(data_dir, fake_minimap2, mixed_fastq, tmp_p
     other = write_fastq(tmp_path / "other.fastq", [("v_9", "ACGT"), ("h_9", "ACGT")])
     assert add(data_dir, "ref.fasta", "X", "x", str(mixed_fastq), str(other)) == 0
     assert names_in(data_dir / "virus_reads" / "x.fastq.gz")[-1] == "v_9"
+    raw = data_dir / "raw_data" / "RUN" / "r.fastq"
+    write_fastq(raw, [("v_1", "ACGT")])
+    assert add(data_dir, "ref.fasta", "Y", "y", str(mixed_fastq), str(raw)) == 0
+    assert organisms(data_dir)["Y"].source_fastq == f"{mixed_fastq.resolve()};raw_data/RUN/r.fastq"
 
 
 @pytest.mark.parametrize("args, message", [
