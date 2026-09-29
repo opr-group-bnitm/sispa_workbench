@@ -868,18 +868,22 @@ def test_remove_viral_reads_min_recovery(tmp_path, fake_nextflow):
 
 def test_remove_viral_reads_default_output(tmp_path, fake_nextflow, capsys):
     raw = tmp_path / "data" / "raw_data"
+    backgrounds = tmp_path / "data" / "output" / "background_fastqs"
     write_fastq(raw / "RUN" / "run.fastq", MIXED_READS)
     assert remove_viral(tmp_path, "RUN", "--vimop-dir", str(tmp_path / "vimop"), "--nextflow", str(fake_nextflow)) == 0
-    out = raw / "RUN_no_viral" / "RUN_no_viral.fastq.gz"
-    assert names_in(out) == ["h_1", "low_1", "v_2/1", "h_2"]
-    assert (raw / "RUN_no_viral" / "RUN_no_viral.removed_reads.tsv").exists()
-    own = (tmp_path / "data" / "own_datasets.tsv").read_text().splitlines()
-    assert own[1:] == ["RUN_no_viral\t\t\tRUN without the reads of viruses vimop found (min recovery 50%)\t"]
+    assert names_in(backgrounds / "RUN_no_viral.fastq.gz") == ["h_1", "low_1", "v_2/1", "h_2"]
+    assert (backgrounds / "RUN_no_viral.removed_reads.tsv").exists()
+    assert not (tmp_path / "data" / "own_datasets.tsv").exists()  # not a raw dataset
     # a run outside data/raw_data is named after its file
     write_fastq(tmp_path / "elsewhere" / "sample 7.fastq.gz", MIXED_READS)
     assert remove_viral(tmp_path, str(tmp_path / "elsewhere" / "sample 7.fastq.gz"),
                         "--vimop-output", str(tmp_path / "vimop" / "output")) == 0
-    assert (raw / "sample_7_no_viral" / "sample_7_no_viral.fastq.gz").exists()
+    assert (backgrounds / "sample_7_no_viral.fastq.gz").exists()
+    # written into data/raw_data with -o, it becomes an own dataset
+    assert remove_viral(tmp_path, "RUN", "-o", str(raw / "RUN_clean" / "run.fastq.gz"),
+                        "--vimop-output", str(tmp_path / "vimop" / "output")) == 0
+    own = (tmp_path / "data" / "own_datasets.tsv").read_text().splitlines()
+    assert own[1:] == ["RUN_clean\t\t\tRUN without the reads of viruses vimop found (min recovery 50%)\t"]
 
 
 def test_remove_viral_reads_stages_several_files(tmp_path, fake_nextflow):

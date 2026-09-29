@@ -44,6 +44,11 @@ def alignments_dir(data_dir: Path) -> Path:
     return data_dir / "alignments"
 
 
+def background_fastqs_dir(data_dir: Path) -> Path:
+    """Where remove_viral_reads.py puts runs without their viral reads."""
+    return data_dir / "output" / "background_fastqs"
+
+
 def inside(path: Path, root: Path) -> Optional[str]:
     """path relative to root ("" for root itself) if it lies inside root, else None."""
     for p, r in ((os.path.abspath(path), os.path.abspath(root)),

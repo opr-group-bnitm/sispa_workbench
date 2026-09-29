@@ -41,6 +41,7 @@ setup (its database and containers).
 | `data/virus_reads/` | reads of exactly one virus per FASTQ, made by `add_from_ref.py` |
 | `data/bacteria_reads/` | reads of exactly one bacterium per FASTQ, made by `add_from_ref.py` |
 | `data/host_reads/` | reads of exactly one host per FASTQ, made by `add_from_ref.py` |
+| `data/output/background_fastqs/` | runs without their viral reads, made by `remove_viral_reads.py` |
 | `data/input_compositions/` | your compositions for `create_sispa_run.py`; start from `template.csv` |
 | `data/alignments/` | where each read of those FASTQs aligns on its reference, e.g. `virus_reads/COVID.fastq.gz.alignments.tsv.gz`, made by `add_from_ref.py`; `create_sispa_run.py` needs them for depths |
 | `output/fastqs/` | artificial runs made by `create_sispa_run.py` |
@@ -109,7 +110,7 @@ viruses it found, for example to get a virus-free background:
 
 ```bash
 ./remove_viral_reads.py BOV-6760
-# -> data/raw_data/BOV-6760_no_viral/BOV-6760_no_viral.fastq.gz
+# -> data/output/background_fastqs/BOV-6760_no_viral.fastq.gz
 ```
 
 It runs vimop with its default settings,
@@ -124,8 +125,9 @@ human cells, or phages matching bacteria. Viruses with too few reads for a
 consensus stay in with the default.
 
 The input can be dataset ids, FASTQ files or folders of them. Without `-o`, the
-cleaned run becomes its own dataset, `data/raw_data/<name>_no_viral/`, and is
-added to `data/own_datasets.tsv`. The reads removed per virus are listed in
+cleaned run goes to `data/output/background_fastqs/<name>_no_viral.fastq.gz`
+(written with `-o` into a new folder in `data/raw_data/`, it becomes a dataset
+in `data/own_datasets.tsv`). The reads removed per virus are listed in
 `<name>_no_viral.removed_reads.tsv` next to it, and `--viral-out` also writes
 the removed reads. `--vimop-output` reuses an earlier vimop output of the same
 reads instead of running vimop (every sample in it counts); `--vimop-args` and
