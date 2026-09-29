@@ -1,42 +1,68 @@
 #!/usr/bin/env python3
-"""Extract the reads of one organism by mapping a FASTQ against its reference.
+"""Extract the reads of one organism from datasets by mapping them to its reference.
 
-Every read with a primary minimap2 alignment to REFERENCE is written, unchanged,
-to data/<category>_reads/FILENAME, and the file is registered in
-data/organisms.tsv under ORGANISM_ID (see sync_reads.py), together with the
-reference and the input FASTQ(s) it came from.
+This is the only way to add an organism: every read of the datasets' FASTQs
+with a primary minimap2 alignment to REFERENCE is written, unchanged, to
+data/<category>_reads/FILENAME, and the file is registered in data/organisms.tsv
+under ORGANISM_ID with its read statistics, the breadth of coverage and the
+depth range on the reference, the reference, and the source dataset(s). Where
+each read aligns is saved in data/alignments/<category>_reads/FILENAME.alignments.tsv.gz,
+which create_sispa_run.py uses for depths.
 
-minimap2 runs with the settings of the vimop pipeline
-(https://github.com/opr-group-bnitm/vimop): -x map-ont --secondary=no, plus
--k 11 -w 5 for --category virus (vimop's map_to_ref); references over 500 MB
-are indexed in 2G parts (vimop's filter_virus_target). Like vimop, every read
-with a primary alignment is kept, whatever its mapping quality.
+Each DATASET is one of:
+  - a dataset id: a public dataset from publicly_available_datasets.tsv (fetch
+    it with download_datasets.sh), or one of yours from data/own_datasets.tsv;
+  - a folder in data/raw_data/ that is in neither table yet;
+  - a FASTQ file or a folder of FASTQs anywhere on the machine.
+Data that is in no table yet is added to data/own_datasets.tsv (created when
+needed) under an id made from its name, with its path if it is outside
+data/raw_data/; using the same path again reuses that row. A path inside a
+known dataset, e.g. one run of a public dataset, uses just that part of it.
+organisms.tsv records the source as <dataset_id> or <dataset_id>/<part>.
+
+minimap2 runs as in the vimop pipeline (https://github.com/opr-group-bnitm/vimop):
+-ax map-ont --secondary=no, plus -k 11 -w 5 for --category virus (vimop's
+map_to_ref); references over 500 MB are indexed in 2G parts (vimop's
+filter_virus_target). Like vimop, every read with a primary alignment is kept,
+whatever its mapping quality. Depth is counted like vimop's
+samtools depth -aa -J, over all reference sequences together.
 
 REFERENCE is a FASTA (optionally gzipped) or a prebuilt minimap2 .mmi index; a
-bare name is also looked up in data/references/. Several FASTQs can be given,
-e.g. all runs of a dataset in data/raw_data/<dataset_id>/.
+bare name is also looked up in data/references/.
 
 Examples:
-    ./add_from_ref.py NC_045512.2.fasta COVID COVID.fastq.gz data/raw_data/SARS2-BC/*.fastq.gz
-    ./add_from_ref.py --category host human.mmi human human.fastq.gz data/mixed_reads/sample1.fastq.gz
-    ./add_from_ref.py --min-mapq 20 --min-aligned-fraction 0.8 lasv.fasta LASV LASV.fastq.gz run1.fastq.gz run2.fastq.gz
+    ./add_from_ref.py NC_045512.2.fasta COVID COVID.fastq.gz SARS2-BC
+    ./add_from_ref.py NC_045512.2.fasta COVID-1 COVID-1.fastq.gz data/raw_data/SARS2-BC/SRR15356294_1.fastq.gz
+    ./add_from_ref.py --category host ARS-UCD2.0.fna cattle cattle.fastq.gz BOV-6760 BOV-6763
+    ./add_from_ref.py lasv.fasta LASV LASV.fastq.gz /Volumes/runs/2025-06-01/fastq_pass/barcode05
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import re
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
-from workbench.fastq import FastqError, is_fastq, open_write, read_fastq, read_name, write_record
-from workbench.organisms import SyncError, invalid_id_reason, load_organisms, sync_reads
-from workbench.paths import READ_CATEGORIES, default_data_dir, reads_dir
+from workbench.alignments import AlignmentWriter, alignments_path
+from workbench.coverage import DepthCounter, combine
+from workbench.datasets import (
+    Dataset, DatasetError, add_own_dataset, fastqs_at, load_datasets, own_datasets_tsv,
+)
+from workbench.fastq import (
+    FastqError, FastqStats, is_fastq, open_write, read_fastq, read_name, strip_fastq_suffix, write_record,
+)
+from workbench.organisms import (
+    Organism, RegistryError, invalid_id_reason, load_organisms, prune_missing, register, unregistered_fastqs,
+)
+from workbench.paths import READ_CATEGORIES, default_data_dir, raw_data_dir, reads_dir
 
 
 class AddError(RuntimeError):
@@ -52,6 +78,9 @@ VIMOP_VIRUS_ARGS = ["-k", "11", "-w", "5"]
 # get a split index of at most 2G bases per part
 VIMOP_SPLIT_THRESHOLD = 500 * 1024 * 1024
 VIMOP_SPLIT_ARGS = ["-I", "2G"]
+
+# print coverage per reference sequence only for references with few of them
+MAX_SEQUENCES_SHOWN = 10
 
 
 def minimap2_args(reference: Path, category: str, split_prefix: Path) -> List[str]:
@@ -76,44 +105,108 @@ def covered_length(intervals: List[Tuple[int, int]]) -> int:
     return covered
 
 
-def mapped_read_names(
-    reference: Path, fastq: Path, preset: str, threads: int,
-    min_mapq: int, min_fraction: float, extra_args: List[str],
-) -> Set[str]:
-    """Names of the reads in fastq whose primary alignments pass the filters."""
-    # -c: base-level alignment, so a read counts as mapped exactly when it
-    # would be a mapped record in minimap2's SAM output (what vimop uses)
-    cmd = ["minimap2", "-c", "-x", preset, "-t", str(threads), *extra_args, str(reference), str(fastq)]
-    print(f"[map]     {' '.join(shlex.quote(c) for c in cmd)}")
+REF_OPS = re.compile(rb"(\d+)[MDN=X]")      # CIGAR operations that consume the reference
+QUERY_OPS = re.compile(rb"(\d+)[MIS=XH]")   # ... that consume the read, clips included
+LEAD_CLIP = re.compile(rb"^(\d+)[SH]")
+TRAIL_CLIP = re.compile(rb"(\d+)[SH]$")
 
-    # per read: query length and the query intervals of its passing alignments
-    hits: Dict[str, Tuple[int, List[Tuple[int, int]]]] = {}
-    with tempfile.TemporaryFile() as err:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=err, text=True, bufsize=1 << 20)
-        for line in proc.stdout:
-            fields = line.rstrip("\n").split("\t")
-            if len(fields) < 12 or "tp:A:S" in fields[12:] or int(fields[11]) < min_mapq:
-                continue
-            qname, qlen = fields[0], int(fields[1])
-            hits.setdefault(qname, (qlen, []))[1].append((int(fields[2]), int(fields[3])))
-        if proc.wait() != 0:
-            err.seek(0)
-            tail = err.read().decode(errors="replace").strip().splitlines()[-15:]
-            raise AddError(f"minimap2 failed on {fastq} (exit code {proc.returncode}):\n  " + "\n  ".join(tail))
 
-    return {
-        name for name, (qlen, intervals) in hits.items()
-        if qlen == 0 or covered_length(intervals) / qlen >= min_fraction
-    }
+@dataclass
+class Alignment:
+    sequence: str
+    start: int  # 0-based, on the reference
+    end: int
+    query_start: int  # on the read as sequenced
+    query_end: int
+    query_length: int
+
+
+def parse_alignment(fields: List[bytes]) -> Alignment:
+    """An alignment from the first six SAM fields of a mapped record."""
+    _, flag, rname, pos, _, cigar = fields
+    start = int(pos) - 1
+    end = start + sum(map(int, REF_OPS.findall(cigar)))
+    query_length = sum(map(int, QUERY_OPS.findall(cigar)))
+    lead = LEAD_CLIP.match(cigar)
+    trail = TRAIL_CLIP.search(cigar)
+    lead_clip = int(lead.group(1)) if lead else 0
+    trail_clip = int(trail.group(1)) if trail else 0
+    if int(flag) & 0x10:  # reverse strand: the CIGAR runs against the read
+        lead_clip, trail_clip = trail_clip, lead_clip
+    return Alignment(rname.decode(), start, end, lead_clip, query_length - trail_clip, query_length)
+
+
+class Mapping:
+    """Maps FASTQs to one reference and collects the reads that pass the filters."""
+
+    def __init__(self, reference: Path, preset: str, threads: int, min_mapq: int,
+                 min_fraction: float, extra_args: List[str]) -> None:
+        self.reference = reference
+        self.preset = preset
+        self.threads = threads
+        self.min_mapq = min_mapq
+        self.min_fraction = min_fraction
+        self.extra_args = extra_args
+        self.lengths: Dict[str, int] = {}  # reference sequences, from the SAM header
+        self.depth = DepthCounter()
+
+    def keep(self, alignments: List[Alignment]) -> bool:
+        if self.min_fraction <= 0:
+            return True
+        length = alignments[0].query_length
+        spans = [(a.query_start, a.query_end) for a in alignments]
+        return length == 0 or covered_length(spans) / length >= self.min_fraction
+
+    def read_names(self, fastq: Path) -> Dict[str, List[Tuple[str, int, int]]]:
+        """The reads in fastq to keep, by name, with their alignments as
+        (sequence, start, end); these count towards the depth."""
+        cmd = ["minimap2", "-a", "-x", self.preset, "--sam-hit-only", "-t", str(self.threads),
+               *self.extra_args, str(self.reference), str(fastq)]
+        print(f"[map]     {' '.join(shlex.quote(c) for c in cmd)}")
+        names: Dict[str, List[Tuple[str, int, int]]] = {}
+
+        def flush(qname: Optional[bytes], alignments: List[Alignment]) -> None:
+            if alignments and self.keep(alignments):
+                names[qname.decode()] = [(a.sequence, a.start, a.end) for a in alignments]
+                for a in alignments:
+                    self.depth.add(a.sequence, a.start, a.end)
+
+        with tempfile.TemporaryFile() as err:
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=err, bufsize=1 << 20)
+            current: Optional[bytes] = None
+            group: List[Alignment] = []
+            for line in proc.stdout:
+                if line.startswith(b"@"):
+                    if line.startswith(b"@SQ"):
+                        tags = dict(f.split(b":", 1) for f in line.rstrip(b"\r\n").split(b"\t")[1:] if b":" in f)
+                        self.lengths[tags[b"SN"].decode()] = int(tags[b"LN"])
+                    continue
+                fields = line.split(b"\t", 6)[:6]
+                # unmapped or secondary alignments, or below the mapping quality cut-off
+                if int(fields[1]) & 0x104 or int(fields[4]) < self.min_mapq:
+                    continue
+                # minimap2 writes all alignments of a read one after the other
+                if fields[0] != current:
+                    flush(current, group)
+                    current, group = fields[0], []
+                group.append(parse_alignment(fields))
+            flush(current, group)
+            if proc.wait() != 0:
+                err.seek(0)
+                tail = err.read().decode(errors="replace").strip().splitlines()[-15:]
+                raise AddError(f"minimap2 failed on {fastq} (exit code {proc.returncode}):\n  " + "\n  ".join(tail))
+        return names
 
 
 def data_relative(path: Path, data_dir: Path) -> str:
     """path relative to data_dir when it lies inside it, else absolute."""
-    path = path.resolve()
-    try:
-        return path.relative_to(data_dir.resolve()).as_posix()
-    except ValueError:
-        return str(path)
+    for inner, outer in ((Path(os.path.abspath(path)), Path(os.path.abspath(data_dir))),
+                         (path.resolve(), data_dir.resolve())):
+        try:
+            return inner.relative_to(outer).as_posix()
+        except ValueError:
+            pass
+    return os.path.abspath(path)
 
 
 def resolve_reference(reference: str, data_dir: Path) -> Path:
@@ -126,12 +219,112 @@ def resolve_reference(reference: str, data_dir: Path) -> Path:
     raise AddError(f"reference not found: {reference} (also looked in {candidate.parent})")
 
 
+@dataclass
+class Source:
+    label: str  # what organisms.tsv records: <dataset_id> or <dataset_id>/<part>
+    files: List[Path]
+
+
+def inside(path: Path, root: Path) -> Optional[str]:
+    """path relative to root ("" for root itself) if it lies inside root, else None."""
+    for p, r in ((os.path.abspath(path), os.path.abspath(root)),
+                 (os.path.realpath(path), os.path.realpath(root))):
+        if p == r:
+            return ""
+        if p.startswith(r.rstrip(os.sep) + os.sep):
+            return Path(os.path.relpath(p, r)).as_posix()
+    return None
+
+
+def containing_dataset(path: Path, datasets: Dict[str, Dataset], data_dir: Path) -> Tuple[Optional[str], str]:
+    """The dataset a path lies in and the part of it the path points to."""
+    raw = raw_data_dir(data_dir)
+    rel = inside(path, raw)
+    if rel == "":
+        raise AddError(f"give a dataset in {raw}/, not the whole folder")
+    if rel is not None:
+        dataset_id, _, part = rel.partition("/")
+        return dataset_id, part
+    best: Tuple[Optional[str], str] = (None, "")
+    for dataset in datasets.values():
+        if dataset.path:
+            rel = inside(path, dataset.location(data_dir))
+            if rel is not None and (best[0] is None or len(rel) < len(best[1])):
+                best = (dataset.dataset_id, rel)
+    return best
+
+
+def new_dataset_id(path: Path, datasets: Dict[str, Dataset], data_dir: Path) -> str:
+    """An unused dataset id made from the name of path."""
+    name = strip_fastq_suffix(Path(os.path.abspath(path)).name)
+    base = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("._-") or "dataset"
+    raw = raw_data_dir(data_dir)
+    taken = set(datasets) | ({p.name for p in raw.iterdir()} if raw.is_dir() else set())
+    dataset_id, n = base, 1
+    while dataset_id in taken:
+        n += 1
+        dataset_id = f"{base}-{n}"
+    return dataset_id
+
+
+def resolve_sources(items: List[str], data_dir: Path) -> List[Source]:
+    """The FASTQs behind each DATASET argument; data in no table yet is added
+    to own_datasets.tsv."""
+    datasets = load_datasets(data_dir)
+    raw = raw_data_dir(data_dir)
+    sources: List[Source] = []
+    used: Dict[str, str] = {}  # real path of each FASTQ -> label it came with
+    for item in items:
+        if "/" not in item and (item in datasets or os.path.lexists(raw / item)):
+            dataset_id, part = item, ""
+        else:
+            path = Path(os.path.expanduser(item))
+            if not os.path.lexists(path):
+                raise AddError(
+                    f"{item!r} is neither a dataset id (see publicly_available_datasets.tsv, "
+                    f"{own_datasets_tsv(data_dir)} and {raw}/) nor an existing file or folder"
+                )
+            dataset_id, part = containing_dataset(path, datasets, data_dir)
+            if dataset_id is None:  # FASTQs outside every known dataset
+                dataset_id = new_dataset_id(path, datasets, data_dir)
+                location = os.path.abspath(path)
+                table = add_own_dataset(data_dir, dataset_id, location)
+                datasets[dataset_id] = Dataset(dataset_id, table, location)
+                print(f"[dataset] {dataset_id}: added to {table} for {location} -- describe it there")
+        if dataset_id not in datasets:  # a folder in data/raw_data/ that is in neither table
+            table = add_own_dataset(data_dir, dataset_id)
+            datasets[dataset_id] = Dataset(dataset_id, table)
+            print(f"[dataset] {dataset_id}: added to {table} as your own dataset -- describe it there")
+
+        dataset = datasets[dataset_id]
+        location = dataset.location(data_dir)
+        label = f"{dataset_id}/{part}" if part else dataset_id
+        if dataset.path and not os.path.lexists(location):
+            raise AddError(f"dataset {dataset_id} is at {location}, which does not exist (is the drive mounted?)")
+        files = fastqs_at(location / part if part else location)
+        if not files:
+            if dataset.is_public and not part:
+                raise AddError(f"dataset {dataset_id} has no FASTQ files in {location}/; "
+                               f"download it with ./download_datasets.sh {dataset_id}")
+            raise AddError(f"{label}: no FASTQ files (.fastq/.fq, optionally .gz) in {location / part}")
+        for fastq in files:
+            real = os.path.realpath(fastq)
+            if real in used:
+                raise AddError(f"{fastq} is included twice, via {used[real]} and {label}")
+            used[real] = label
+        kind = "public" if dataset.is_public else f"own, {location}" if dataset.path else "own"
+        print(f"[dataset] {label} ({kind}): {len(files)} FASTQ file(s)")
+        sources.append(Source(label, files))
+    return sources
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("reference", help="reference FASTA or minimap2 index of the organism")
     parser.add_argument("organism_id", help="id to register the reads under in organisms.tsv")
     parser.add_argument("filename", help="output file name, e.g. COVID.fastq.gz (.fastq.gz is added if missing)")
-    parser.add_argument("fastq", nargs="+", type=Path, help="FASTQ file(s) to extract reads from")
+    parser.add_argument("dataset", nargs="+",
+                        help="where to extract the reads from: dataset ids, or FASTQ files / folders anywhere")
     parser.add_argument("--category", choices=READ_CATEGORIES, default="virus",
                         help="folder the reads go to: data/<category>_reads/ (default: %(default)s)")
     parser.add_argument("--preset", default="map-ont",
@@ -153,7 +346,7 @@ def main(argv=None) -> int:
 
     try:
         return run(args)
-    except (AddError, SyncError, FastqError) as err:
+    except (AddError, RegistryError, DatasetError, FastqError) as err:
         print(f"ERROR: {err}", file=sys.stderr)
         return 1
 
@@ -171,55 +364,90 @@ def run(args) -> int:
     if not 0.0 <= args.min_aligned_fraction <= 1.0:
         raise AddError("--min-aligned-fraction must be between 0 and 1")
     reference = resolve_reference(args.reference, data_dir)
-    for fastq in args.fastq:
-        if not fastq.is_file():
-            raise AddError(f"FASTQ not found: {fastq}")
 
     filename = args.filename if is_fastq(args.filename) else f"{args.filename}.fastq.gz"
     out_dir = reads_dir(data_dir, args.category)
-    out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / filename
     rel_name = out_path.relative_to(data_dir).as_posix()
     if out_path.exists() and not args.force:
         raise AddError(f"{out_path} already exists (use --force to overwrite)")
-    for organism in load_organisms(data_dir):
+    for organism in prune_missing(data_dir):
         if organism.organism_id == args.organism_id and organism.filename != rel_name:
             raise AddError(f"organism_id {args.organism_id!r} is already used by {organism.filename}")
+    sources = resolve_sources(args.dataset, data_dir)
 
+    out_dir.mkdir(parents=True, exist_ok=True)
     split_dir = tempfile.TemporaryDirectory(prefix="add_from_ref_")
     extra = minimap2_args(reference, args.category, Path(split_dir.name) / "map_index")
     extra += shlex.split(args.minimap2_args)
-    tmp_path = out_dir / f".partial.{filename}"  # hidden from sync, keeps the .gz suffix
-    n_in = n_out = 0
+    mapping = Mapping(reference, args.preset, args.threads, args.min_mapq, args.min_aligned_fraction, extra)
+    tmp_path = out_dir / f".partial.{filename}"  # hidden, keeps the .gz suffix
+    final_alignments = alignments_path(data_dir, rel_name)
+    final_alignments.parent.mkdir(parents=True, exist_ok=True)
+    tmp_alignments = final_alignments.with_name(f".partial.{final_alignments.name}")
+    alignments: Optional[AlignmentWriter] = None
+    stats = FastqStats()
+    n_in = 0
     try:
         with open_write(tmp_path) as out:
-            for fastq in args.fastq:
-                names = mapped_read_names(reference, fastq, args.preset, args.threads,
-                                          args.min_mapq, args.min_aligned_fraction, extra)
-                file_in = file_out = 0
-                for record in read_fastq(fastq):
-                    file_in += 1
-                    name = read_name(record[0])
-                    # minimap2 drops a /1 or /2 mate suffix from read names
-                    if name in names or (name[-2:] in ("/1", "/2") and name[:-2] in names):
-                        write_record(out, record)
-                        file_out += 1
-                print(f"[extract] {fastq}: {file_out} of {file_in} reads map to {reference.name}")
-                n_in += file_in
-                n_out += file_out
-        if n_out == 0:
+            for source in sources:
+                for fastq in source.files:
+                    kept = mapping.read_names(fastq)
+                    if alignments is None:  # the reference sequences are known after the first mapping
+                        alignments = AlignmentWriter(tmp_alignments, mapping.lengths)
+                    file_in = file_out = 0
+                    for record in read_fastq(fastq):
+                        file_in += 1
+                        name = read_name(record[0])
+                        if name not in kept and name[-2:] in ("/1", "/2"):
+                            name = name[:-2]  # minimap2 drops a /1 or /2 mate suffix from read names
+                        if name in kept:
+                            alignments.add(stats.n_reads, kept[name])
+                            write_record(out, record)
+                            stats.add(len(record[1]))
+                            file_out += 1
+                    print(f"[extract] {data_relative(fastq, data_dir)}: {file_out} of {file_in} reads "
+                          f"map to {reference.name}")
+                    n_in += file_in
+        if stats.n_reads == 0:
             raise AddError(f"no reads mapped to {reference}; nothing written")
+        alignments.close(stats.n_reads)
+        alignments = None
+        os.replace(tmp_alignments, final_alignments)
         os.replace(tmp_path, out_path)
     finally:
+        if alignments is not None:
+            alignments.out.close()
         tmp_path.unlink(missing_ok=True)
+        tmp_alignments.unlink(missing_ok=True)
         split_dir.cleanup()
+    print(f"[written] {out_path} ({stats.n_reads} of {n_in} reads, {100 * stats.n_reads / n_in:.2f}%)")
 
-    print(f"[written] {out_path} ({n_out} of {n_in} reads, {100 * n_out / n_in:.2f}%)")
-    source = (
-        data_relative(reference, data_dir),
-        ";".join(data_relative(fastq, data_dir) for fastq in args.fastq),
-    )
-    sync_reads(data_dir, explicit_ids={rel_name: args.organism_id}, sources={rel_name: source})
+    per_sequence = mapping.depth.summarize(mapping.lengths)
+    if len(per_sequence) <= MAX_SEQUENCES_SHOWN:
+        for name, s in per_sequence.items():
+            print(f"[coverage] {name} ({s.length} bp): breadth {s.breadth:.2f}%, "
+                  f"depth {s.min_depth}-{s.max_depth}")
+    total = combine(list(per_sequence.values()))
+    print(f"[coverage] {reference.name}, {len(per_sequence)} sequence(s), {total.length} bp: "
+          f"breadth {total.breadth:.2f}%, depth {total.min_depth}-{total.max_depth}")
+
+    register(data_dir, Organism(
+        organism_id=args.organism_id,
+        filename=rel_name,
+        avg_read_length=round(stats.avg_read_length, 2),
+        max_read_length=stats.max_read_length,
+        min_read_length=stats.min_read_length,
+        n_reads=stats.n_reads,
+        breadth_coverage=round(total.breadth, 2),
+        min_depth=total.min_depth,
+        max_depth=total.max_depth,
+        reference=data_relative(reference, data_dir),
+        source_dataset=";".join(source.label for source in sources),
+    ))
+    for name in unregistered_fastqs(data_dir, load_organisms(data_dir)):
+        print(f"[ignored] {name} was not created by add_from_ref.py and cannot be used; "
+              f"put its reads in {raw_data_dir(data_dir)}/<dataset_id>/ and extract them from there")
     return 0
 
 
