@@ -117,12 +117,15 @@ organism. For a large host genome, build the index once with
 Either way the library is listed in `data/organisms.tsv`:
 
 ```
-organism_id  filename                     avg_read_length  max_read_length  min_read_length  n_reads
-COVID        virus_reads/COVID.fastq.gz   512.33           2911             87               48211
-human        host_reads/human.fastq.gz    1203.10          40122            52               1500000
+organism_id  filename                    avg_read_length  max_read_length  min_read_length  n_reads  reference                   source_fastq
+COVID        virus_reads/COVID.fastq.gz  512.33           2911             87               48211    references/NC_045512.2.fasta raw_data/SARS2-BC/SRR15356294_1.fastq.gz
+human        host_reads/human.fastq.gz   1203.10          40122            52               1500000
 ```
 
-(example values). `sync_reads.py` adds new files, drops deleted ones and only
+(example values). `reference` and `source_fastq` record what `add_from_ref.py`
+mapped: paths relative to `data/` (absolute if outside it), several source
+FASTQs separated by `;`. They stay empty for files you add yourself; you can
+fill them in by hand and later syncs keep them. `sync_reads.py` adds new files, drops deleted ones and only
 rereads files that changed; `add_from_ref.py` and `create_sispa_run.py` run it
 for you.
 

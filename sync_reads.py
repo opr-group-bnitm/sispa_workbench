@@ -4,11 +4,13 @@
 Every FASTQ (.fastq, .fq, optionally .gz) in those folders becomes a row of
 data/organisms.tsv:
 
-    organism_id  filename  avg_read_length  max_read_length  min_read_length  n_reads
+    organism_id  filename  avg_read_length  max_read_length  min_read_length  n_reads  reference  source_fastq
 
 A file you drop in yourself gets its name without the suffix as organism_id
-(virus_reads/COVID.fastq.gz -> COVID). Files that disappeared are dropped from
-the table, and only new or changed files are read, so re-running is cheap.
+(virus_reads/COVID.fastq.gz -> COVID) and an empty reference and source_fastq;
+add_from_ref.py fills those in, and they are kept on later syncs. Files that
+disappeared are dropped from the table, and only new or changed files are
+read, so re-running is cheap.
 
 Examples:
     ./sync_reads.py
