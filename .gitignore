@@ -223,10 +223,10 @@ data/references/*
 data/virus_reads/*
 data/bacteria_reads/*
 data/host_reads/*
-data/mixed_reads/*
+data/alignments/*
 !data/*/.gitkeep
-# describes the local read files, regenerate with ./sync_reads.py
+# local tables: the organisms made with ./add_from_ref.py and your own datasets
 data/organisms.tsv
-data/.organisms_cache.tsv
+data/own_datasets.tsv
 output/fastqs/*
 !output/fastqs/.gitkeep

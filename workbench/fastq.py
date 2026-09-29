@@ -94,16 +94,17 @@ class FastqStats:
     def avg_read_length(self) -> float:
         return self.total_bases / self.n_reads if self.n_reads else 0.0
 
+    def add(self, length: int) -> None:
+        if self.n_reads == 0 or length < self.min_read_length:
+            self.min_read_length = length
+        if length > self.max_read_length:
+            self.max_read_length = length
+        self.n_reads += 1
+        self.total_bases += length
+
 
 def fastq_stats(path: Path | str) -> FastqStats:
-    n = total = 0
-    lo, hi = None, 0
+    stats = FastqStats()
     for _, seq, _ in read_fastq(path):
-        length = len(seq)
-        n += 1
-        total += length
-        if lo is None or length < lo:
-            lo = length
-        if length > hi:
-            hi = length
-    return FastqStats(n, lo or 0, hi, total)
+        stats.add(len(seq))
+    return stats

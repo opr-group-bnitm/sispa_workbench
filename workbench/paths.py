@@ -11,11 +11,16 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# the three folders whose FASTQs hold reads of exactly one organism
+# curated public datasets, tracked in git
+PUBLIC_DATASETS_TSV = REPO_ROOT / "publicly_available_datasets.tsv"
+
+# the three folders whose FASTQs hold reads of exactly one organism; only
+# add_from_ref.py writes to them
 READ_CATEGORIES = ("virus", "bacteria", "host")
 
+# local tables inside the data directory, not tracked in git
 ORGANISMS_TSV = "organisms.tsv"
-SYNC_CACHE = ".organisms_cache.tsv"
+OWN_DATASETS_TSV = "own_datasets.tsv"
 
 
 def default_data_dir() -> Path:
@@ -28,3 +33,11 @@ def default_output_dir() -> Path:
 
 def reads_dir(data_dir: Path, category: str) -> Path:
     return data_dir / f"{category}_reads"
+
+
+def raw_data_dir(data_dir: Path) -> Path:
+    return data_dir / "raw_data"
+
+
+def alignments_dir(data_dir: Path) -> Path:
+    return data_dir / "alignments"
