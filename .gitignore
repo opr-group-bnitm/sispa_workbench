@@ -230,3 +230,5 @@ data/organisms.tsv
 data/own_datasets.tsv
 output/fastqs/*
 !output/fastqs/.gitkeep
+# vimop runs of ./remove_viral_reads.py, with nextflow's work folders
+output/vimop/

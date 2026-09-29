@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -41,3 +42,14 @@ def raw_data_dir(data_dir: Path) -> Path:
 
 def alignments_dir(data_dir: Path) -> Path:
     return data_dir / "alignments"
+
+
+def inside(path: Path, root: Path) -> Optional[str]:
+    """path relative to root ("" for root itself) if it lies inside root, else None."""
+    for p, r in ((os.path.abspath(path), os.path.abspath(root)),
+                 (os.path.realpath(path), os.path.realpath(root))):
+        if p == r:
+            return ""
+        if p.startswith(r.rstrip(os.sep) + os.sep):
+            return Path(os.path.relpath(p, r)).as_posix()
+    return None

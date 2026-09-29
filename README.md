@@ -28,7 +28,9 @@ conda activate sispa_workbench
 ```
 
 The Python tools only need the standard library; `add_from_ref.py` needs
-`minimap2`, and `download_datasets.sh` needs `curl`.
+`minimap2`, and `download_datasets.sh` needs `curl`. `remove_viral_reads.py`
+needs `nextflow` and a working [vimop](https://github.com/opr-group-bnitm/vimop)
+setup (its database and containers).
 
 ## Folders
 
@@ -43,6 +45,7 @@ The Python tools only need the standard library; `add_from_ref.py` needs
 | `data/alignments/` | where each read of those FASTQs aligns on its reference, e.g. `virus_reads/COVID.fastq.gz.alignments.tsv.gz`, made by `add_from_ref.py`; `create_sispa_run.py` needs them for depths |
 | `output/fastqs/` | artificial runs made by `create_sispa_run.py` |
 | `output/compositions/` | what each artificial run is made of |
+| `output/vimop/<name>/` | vimop runs of `remove_viral_reads.py`: input, output, nextflow work folder and log |
 
 Sequencing data is git-ignored, and so are the two tables that describe your
 local files, `data/own_datasets.tsv` and `data/organisms.tsv`. Composition CSVs
@@ -98,6 +101,42 @@ neither table (a folder in `data/raw_data/`, or a FASTQ file or folder anywhere
 on the machine) gets a row, with an id made from its name and its path. Fill in
 its description afterwards. Symlinks are followed, and a link to a drive that
 is not mounted is reported instead of being skipped.
+
+### Removing viral reads from a run
+
+`remove_viral_reads.py` runs vimop on a run and removes the reads of the
+viruses it found, for example to get a virus-free background:
+
+```bash
+./remove_viral_reads.py BOV-6760
+# -> data/raw_data/BOV-6760_no_viral/BOV-6760_no_viral.fastq.gz
+```
+
+It runs vimop with its default settings,
+`nextflow run opr-group-bnitm/vimop --fastq ... --out_dir ... -resume`, keeping vimop's input, output, work folder and log in
+`output/vimop/<name>/`. Then, for every virus in vimop's
+`tables/consensus.tsv` whose consensus reached `--min-recovery` (default 50%,
+the table's `Coverage`: positions called, not N), it removes every read in that
+virus's `consensus/<reference>.reads.bam`; all other reads are written
+unchanged. `--min-recovery 0` removes the reads of everything vimop reported,
+which can include real background: a low-level hit like Epstein-Barr virus in
+human cells, or phages matching bacteria. Viruses with too few reads for a
+consensus stay in with the default.
+
+The input can be dataset ids, FASTQ files or folders of them. Without `-o`, the
+cleaned run becomes its own dataset, `data/raw_data/<name>_no_viral/`, and is
+added to `data/own_datasets.tsv`. The reads removed per virus are listed in
+`<name>_no_viral.removed_reads.tsv` next to it, and `--viral-out` also writes
+the removed reads. `--vimop-output` reuses an earlier vimop output of the same
+reads instead of running vimop (every sample in it counts); `--vimop-args` and
+`--nextflow-args` pass options on, e.g. `--vimop-args "--targets LASV"` or
+`--nextflow-args "-profile docker"`, and `-c` adds a nextflow config if your
+setup needs one.
+
+The vimop run is kept by default, for vimop's report and to reuse it.
+`--discard-vimop` deletes it (input, output, nextflow's work folder and logs)
+once the cleaned run is written; a failed run is always kept, and an output
+given with `--vimop-output` is never deleted.
 
 ## 2. Build the single-organism library
 

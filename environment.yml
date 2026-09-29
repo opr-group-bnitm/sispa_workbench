@@ -8,5 +8,6 @@ dependencies:
   - python>=3.9
   - minimap2=2.26      # add_from_ref.py; same version as vimop
   - sra-tools          # optional: download_datasets.sh fallback for runs ENA has no FASTQ for
+  - nextflow=25.10.2   # remove_viral_reads.py; vimop itself needs its database and containers, see its README
   - curl
   - pytest             # tests/

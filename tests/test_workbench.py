@@ -1,5 +1,6 @@
 import csv
 import gzip
+import os
 import random
 import shutil
 import sys
@@ -11,7 +12,8 @@ import pytest
 
 import add_from_ref
 import create_sispa_run
-from workbench import paths
+import remove_viral_reads
+from workbench import mapping, paths
 from workbench.alignments import AlignmentWriter, ReadAlignments, alignments_path, read_alignments
 from workbench.coverage import DepthCounter, combine, select_for_depth, summarize
 from workbench.datasets import DatasetError, fastqs_at, load_datasets
@@ -194,12 +196,12 @@ def test_select_for_depth_uses_every_read_where_depth_is_short():
 
 
 def test_parse_alignment_strands_and_clips():
-    forward = add_from_ref.parse_alignment([b"r", b"0", b"ref", b"11", b"60", b"5S30M10I2D3S"])
+    forward = mapping.parse_alignment([b"r", b"0", b"ref", b"11", b"60", b"5S30M10I2D3S"])
     assert (forward.start, forward.end, forward.query_length) == (10, 42, 48)
     assert (forward.query_start, forward.query_end) == (5, 45)
-    reverse = add_from_ref.parse_alignment([b"r", b"16", b"ref", b"11", b"60", b"5S30M10I2D3S"])
+    reverse = mapping.parse_alignment([b"r", b"16", b"ref", b"11", b"60", b"5S30M10I2D3S"])
     assert (reverse.query_start, reverse.query_end) == (3, 43)
-    supplementary = add_from_ref.parse_alignment([b"r", b"2048", b"ref", b"61", b"60", b"20H20M"])
+    supplementary = mapping.parse_alignment([b"r", b"2048", b"ref", b"61", b"60", b"20H20M"])
     assert (supplementary.start, supplementary.end) == (60, 80)
     assert (supplementary.query_start, supplementary.query_end, supplementary.query_length) == (20, 40, 40)
 
@@ -583,12 +585,12 @@ def test_minimap2_args_follow_vimop(tmp_path):
     small = tmp_path / "virus.fasta"
     small.write_text(">v\nACGT\n")
     split = tmp_path / "idx"
-    assert add_from_ref.minimap2_args(small, "virus", split) == ["--secondary=no", "-k", "11", "-w", "5"]
-    assert add_from_ref.minimap2_args(small, "host", split) == ["--secondary=no"]
+    assert mapping.minimap2_args(small, "virus", split) == ["--secondary=no", "-k", "11", "-w", "5"]
+    assert mapping.minimap2_args(small, "host", split) == ["--secondary=no"]
     big = tmp_path / "host.fasta"
     with open(big, "wb") as fh:
-        fh.truncate(add_from_ref.VIMOP_SPLIT_THRESHOLD + 1)
-    assert add_from_ref.minimap2_args(big, "host", split) == ["--secondary=no", "-I", "2G", "--split-prefix", str(split)]
+        fh.truncate(mapping.VIMOP_SPLIT_THRESHOLD + 1)
+    assert mapping.minimap2_args(big, "host", split) == ["--secondary=no", "-I", "2G", "--split-prefix", str(split)]
 
 
 @pytest.mark.skipif(shutil.which("minimap2") is None, reason="minimap2 not installed")
@@ -731,3 +733,203 @@ def test_alignments_go_with_their_fastq(tiled, raw, fake_minimap2):
     tile.unlink()
     assert add(tiled, "ref.fasta", "Z", "z", "PUB") == 0
     assert not alignments_path(tiled, "virus_reads/tile.fastq.gz").exists() and "TILE" not in organisms(tiled)
+
+
+# ------------------------------------------------------- remove_viral_reads ---
+
+def write_bam(path, reference, names, unmapped=()):
+    """A minimal BAM file (gzip is enough for the reader) holding the named reads."""
+    import struct
+    text = f"@SQ\tSN:{reference}\tLN:100\n".encode()
+    data = b"BAM\1" + struct.pack("<i", len(text)) + text + struct.pack("<i", 1)
+    data += struct.pack("<i", len(reference) + 1) + reference.encode() + b"\0" + struct.pack("<i", 100)
+    for name, flag in [(n, 0) for n in names] + [(n, 4) for n in unmapped]:
+        read = name.encode() + b"\0"
+        record = struct.pack("<iiBBHHHiiii", 0, 0, len(read), 60, 0, 0, flag, 0, -1, -1, 0) + read
+        data += struct.pack("<i", len(record)) + record
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(path, "wb") as fh:
+        fh.write(data)
+
+
+CONSENSUS_TABLE = (
+    "\tReference\tLength\tMapped reads\tAmbiguous positions\tConsensusLength\tAverage read coverage\t"
+    "Description\tFamily\tOrganism\tSegment\tOrientation\tCurated\tOrganism Label\tPositions called\tCoverage\tIsBest\n"
+    "0\tV1.1\t100\t3\t20\t100\t5.0\tV1.1 some virus\t\tsome virus\tUnknown\tUnknown\tFalse\tNon-Curated\t80\t80.0\tFalse\n"
+    "1\tV2.1\t100\t2\t90\t100\t1.0\tV2.1 a phage\t\ta phage\tUnknown\tUnknown\tFalse\tNon-Curated\t10\t10.0\tFalse\n"
+)
+
+
+def vimop_result(sample_dir):
+    """What vimop writes for a sample: V1 at 80% recovery with 3 reads, V2 at 10% with 2."""
+    (sample_dir / "tables").mkdir(parents=True)
+    (sample_dir / "tables" / "consensus.tsv").write_text(CONSENSUS_TABLE)
+    write_bam(sample_dir / "consensus" / "V1.reads.bam", "V1.1", ["v_1", "half_1", "chim_1"], unmapped=["h_1"])
+    write_bam(sample_dir / "consensus" / "V2.reads.bam", "V2.1", ["low_1", "v_2", "v_1"])
+    return sample_dir
+
+
+def test_bam_read_names(tmp_path):
+    write_bam(tmp_path / "x.bam", "V1.1", ["a", "bb"], unmapped=["c"])
+    assert remove_viral_reads.bam_read_names(tmp_path / "x.bam") == {"a", "bb"}
+
+
+# Stand-in for `nextflow run ... --fastq DIR --out_dir OUT`: records how it was
+# called and puts a prepared vimop result into OUT/<name of DIR>.
+FAKE_NEXTFLOW = """\
+    #!{python}
+    import json, os, shutil, sys
+    args = sys.argv[1:]
+    fastq, out = args[args.index("--fastq") + 1], args[args.index("--out_dir") + 1]
+    with open(os.environ["FAKE_NEXTFLOW_LOG"], "w") as fh:
+        json.dump({"args": args, "cwd": os.getcwd(), "staged": sorted(os.listdir(fastq))}, fh)
+    os.makedirs("work/ab/cdef")  # nextflow's work folder and log, in the launch folder
+    open(".nextflow.log", "w").close()
+    if os.environ.get("FAKE_NEXTFLOW_FAIL"):
+        sys.exit(1)
+    shutil.copytree(os.environ["FAKE_VIMOP_RESULT"], os.path.join(out, os.path.basename(fastq)))
+"""
+
+
+@pytest.fixture
+def fake_nextflow(tmp_path, monkeypatch):
+    exe = tmp_path / "bin" / "nextflow"
+    exe.parent.mkdir(exist_ok=True)
+    exe.write_text(textwrap.dedent(FAKE_NEXTFLOW).replace("{python}", sys.executable))
+    exe.chmod(0o755)
+    monkeypatch.setenv("FAKE_NEXTFLOW_LOG", str(tmp_path / "nextflow_call.json"))
+    monkeypatch.setenv("FAKE_VIMOP_RESULT", str(vimop_result(tmp_path / "vimop_result")))
+    return exe
+
+
+def remove_viral(tmp_path, *args):
+    return remove_viral_reads.main([*args, "--data-dir", str(tmp_path / "data")])
+
+
+def test_remove_viral_reads_with_vimop(tmp_path, fake_nextflow, capsys):
+    import json
+    run = write_fastq(tmp_path / "run" / "run.fastq", MIXED_READS)
+    config = tmp_path / "vimop.config"
+    config.write_text("")
+    out = tmp_path / "clean" / "clean.fastq.gz"
+    vimop_dir = tmp_path / "vimop"
+    assert remove_viral(tmp_path, str(run), "-o", str(out), "-c", str(config), "--vimop-dir", str(vimop_dir),
+                        "--nextflow", str(fake_nextflow), "--viral-out", str(tmp_path / "viral.fastq"),
+                        "--vimop-args", "--targets LASV") == 0
+
+    # vimop ran on a folder named after the output, holding the run, with its output in the vimop folder
+    call = json.loads((tmp_path / "nextflow_call.json").read_text())
+    assert call["args"] == ["run", "opr-group-bnitm/vimop", "--fastq", str((vimop_dir / "input" / "clean").resolve()),
+                            "--out_dir", str((vimop_dir / "output").resolve()), "-c", str(config.resolve()),
+                            "-resume", "--targets", "LASV"]
+    assert os.path.realpath(call["cwd"]) == os.path.realpath(vimop_dir) and call["staged"] == ["run.fastq"]
+    assert os.path.samefile(vimop_dir / "input" / "clean" / "run.fastq", run)  # a hard link, not a copy
+
+    # the reads vimop mapped to V1 (80% recovery) are removed; V2 (10%) keeps its reads
+    assert names_in(out) == ["h_1", "low_1", "v_2/1", "h_2"]
+    assert names_in(tmp_path / "viral.fastq") == ["v_1", "half_1", "chim_1"]
+    assert (tmp_path / "clean" / "clean.removed_reads.tsv").read_text() == (
+        "virus\tdescription\trecovery\tremoved_reads\n"
+        "clean/V1.1\tV1.1 some virus\t80.00\t3\n"
+        "clean/V2.1\tV2.1 a phage\t10.00\t0\n"
+    )
+    out_text = capsys.readouterr().out
+    assert "4 of 7 reads kept, 3 viral reads removed" in out_text and "kept (below 50%)" in out_text
+
+
+def test_remove_viral_reads_keeps_or_discards_the_vimop_run(tmp_path, fake_nextflow, monkeypatch, capsys):
+    run = write_fastq(tmp_path / "run.fastq", MIXED_READS)
+    common = ["--nextflow", str(fake_nextflow)]
+    kept, discarded = tmp_path / "vimop_kept", tmp_path / "vimop_discarded"
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "a.fastq"), "--vimop-dir", str(kept), *common) == 0
+    assert {p.name for p in kept.iterdir()} == {"input", "output", "work", ".nextflow.log"}
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "b.fastq"), "--vimop-dir", str(discarded),
+                        "--discard-vimop", *common) == 0
+    assert not discarded.exists() and names_in(tmp_path / "b.fastq") == names_in(tmp_path / "a.fastq")
+    # an earlier vimop output is never deleted, and a failed run is kept to read its log
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "c.fastq"), "--vimop-output", str(kept / "output"),
+                        "--discard-vimop") == 0
+    assert (kept / "output").exists()
+    monkeypatch.setenv("FAKE_NEXTFLOW_FAIL", "1")
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "d.fastq"), "--vimop-dir", str(discarded),
+                        "--discard-vimop", *common) == 1
+    assert (discarded / ".nextflow.log").exists()
+
+
+def test_remove_viral_reads_min_recovery(tmp_path, fake_nextflow):
+    run = write_fastq(tmp_path / "run.fastq", MIXED_READS)
+    vimop_result(tmp_path / "earlier" / "run")
+    common = ["--vimop-output", str(tmp_path / "earlier"), "--nextflow", "/does/not/exist"]  # vimop must not run
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "all.fastq"), "--min-recovery", "0", *common) == 0
+    assert names_in(tmp_path / "all.fastq") == ["h_1", "h_2"]  # v_2/1 is v_2 in the BAM
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "none.fastq"), "--min-recovery", "90", *common) == 0
+    assert names_in(tmp_path / "none.fastq") == [n for n, _ in MIXED_READS]
+
+
+def test_remove_viral_reads_default_output(tmp_path, fake_nextflow, capsys):
+    raw = tmp_path / "data" / "raw_data"
+    write_fastq(raw / "RUN" / "run.fastq", MIXED_READS)
+    assert remove_viral(tmp_path, "RUN", "--vimop-dir", str(tmp_path / "vimop"), "--nextflow", str(fake_nextflow)) == 0
+    out = raw / "RUN_no_viral" / "RUN_no_viral.fastq.gz"
+    assert names_in(out) == ["h_1", "low_1", "v_2/1", "h_2"]
+    assert (raw / "RUN_no_viral" / "RUN_no_viral.removed_reads.tsv").exists()
+    own = (tmp_path / "data" / "own_datasets.tsv").read_text().splitlines()
+    assert own[1:] == ["RUN_no_viral\t\t\tRUN without the reads of viruses vimop found (min recovery 50%)\t"]
+    # a run outside data/raw_data is named after its file
+    write_fastq(tmp_path / "elsewhere" / "sample 7.fastq.gz", MIXED_READS)
+    assert remove_viral(tmp_path, str(tmp_path / "elsewhere" / "sample 7.fastq.gz"),
+                        "--vimop-output", str(tmp_path / "vimop" / "output")) == 0
+    assert (raw / "sample_7_no_viral" / "sample_7_no_viral.fastq.gz").exists()
+
+
+def test_remove_viral_reads_stages_several_files(tmp_path, fake_nextflow):
+    import json
+    first = write_fastq(tmp_path / "run" / "part1.fastq", MIXED_READS[:3])
+    write_fastq(tmp_path / "run" / "barcode05" / "part2.fastq", MIXED_READS[3:])
+    assert remove_viral(tmp_path, str(first), str(tmp_path / "run"), "-o", str(tmp_path / "out.fastq"),
+                        "--vimop-dir", str(tmp_path / "vimop"), "--nextflow", str(fake_nextflow)) == 0
+    staged = json.loads((tmp_path / "nextflow_call.json").read_text())["staged"]
+    assert staged == ["001_part1.fastq", "002_part2.fastq"]  # part1 is given twice but used once
+    assert names_in(tmp_path / "out.fastq") == ["h_1", "low_1", "v_2/1", "h_2"]
+
+
+def test_remove_viral_reads_when_vimop_finds_nothing(tmp_path, capsys):
+    run = write_fastq(tmp_path / "run.fastq", MIXED_READS)
+    (tmp_path / "empty" / "run").mkdir(parents=True)
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "out.fastq"), "--vimop-output", str(tmp_path / "empty")) == 0
+    assert names_in(tmp_path / "out.fastq") == [n for n, _ in MIXED_READS]
+    assert "vimop reports 0 virus(es)" in capsys.readouterr().out
+
+
+def test_remove_viral_reads_warns_about_foreign_vimop_output(tmp_path, capsys):
+    run = write_fastq(tmp_path / "run.fastq", [("other_1", "ACGT")])
+    vimop_result(tmp_path / "earlier" / "run")
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "out.fastq"), "--vimop-output", str(tmp_path / "earlier")) == 0
+    assert "none of them is in the input" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("setup, message", [
+    ("fail", "vimop failed (exit code 1)"),
+    ("same_dataset", "would be in dataset RUN next to its own input"),
+    ("no_config", "nextflow config not found"),
+    ("exists", "already exists"),
+    ("no_bam", "no V1.reads.bam"),
+])
+def test_remove_viral_reads_errors(tmp_path, fake_nextflow, monkeypatch, capsys, setup, message):
+    run = write_fastq(tmp_path / "data" / "raw_data" / "RUN" / "run.fastq", MIXED_READS)
+    out = tmp_path / "data" / "raw_data" / "RUN-clean" / "clean.fastq"
+    args = [str(run), "-o", str(out), "--vimop-dir", str(tmp_path / "vimop"), "--nextflow", str(fake_nextflow)]
+    if setup == "fail":
+        monkeypatch.setenv("FAKE_NEXTFLOW_FAIL", "1")
+    elif setup == "same_dataset":
+        args[2] = str(tmp_path / "data" / "raw_data" / "RUN" / "clean.fastq")
+    elif setup == "no_config":
+        args += ["-c", str(tmp_path / "missing.config")]
+    elif setup == "exists":
+        write_fastq(out, [("x", "ACGT")])
+    elif setup == "no_bam":
+        (tmp_path / "vimop_result" / "consensus" / "V1.reads.bam").unlink()
+    assert remove_viral(tmp_path, *args) == 1
+    assert message in capsys.readouterr().err
+    if setup != "exists":
+        assert not out.exists()
