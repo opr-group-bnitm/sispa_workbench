@@ -752,20 +752,37 @@ def write_bam(path, reference, names, unmapped=()):
         fh.write(data)
 
 
-CONSENSUS_TABLE = (
-    "\tReference\tLength\tMapped reads\tAmbiguous positions\tConsensusLength\tAverage read coverage\t"
-    "Description\tFamily\tOrganism\tSegment\tOrientation\tCurated\tOrganism Label\tPositions called\tCoverage\tIsBest\n"
-    "0\tV1.1\t100\t3\t20\t100\t5.0\tV1.1 some virus\t\tsome virus\tUnknown\tUnknown\tFalse\tNon-Curated\t80\t80.0\tFalse\n"
-    "1\tV2.1\t100\t2\t90\t100\t1.0\tV2.1 a phage\t\ta phage\tUnknown\tUnknown\tFalse\tNon-Curated\t10\t10.0\tFalse\n"
-)
+CONSENSUS_COLUMNS = ["", "Reference", "Length", "Mapped reads", "Ambiguous positions", "ConsensusLength",
+                     "Average read coverage", "Description", "Family", "Organism", "Segment", "Orientation", "Curated",
+                     "Organism Label", "Positions called", "Coverage", "IsBest"]
+
+# (reference, description, organism, recovery, curated, label, segment, best, reads vimop mapped to it)
+VIMOP_FOUND = [
+    ("V1.1", "V1.1 lassa L", "Mammarenavirus lassaense", 80.0, True, "LASV", "L", True, ["v_1", "half_1", "chim_1"]),
+    ("V2.1", "V2.1 a phage", "Streptococcus phage X", 10.0, False, "Non-Curated", "Unknown", False, ["low_1", "v_2", "v_1"]),
+    ("V3.1", "V3.1 lassa S", "Mammarenavirus lassaense", 60.0, True, "LASV", "S", True, ["chim_1"]),
+    ("V4.1", "V4.1 lassa L, other strain", "Mammarenavirus lassaense", 70.0, True, "LASV", "L", False, ["v_1"]),
+    ("V5.1", "V5.1 a new virus", "Newvirus alphae", 55.0, False, "Non-Curated", "Unknown", False, ["half_1"]),
+    ("V6.1", "V6.1 sars-cov-2", "Severe acute respiratory syndrome coronavirus 2", 90.0, True, "COVID",
+     "Unsegmented", True, ["chim_1"]),
+]
 
 
 def vimop_result(sample_dir):
-    """What vimop writes for a sample: V1 at 80% recovery with 3 reads, V2 at 10% with 2."""
+    """What vimop writes for a sample: its table, and per reference the reads BAM,
+    the reference and the consensus."""
     (sample_dir / "tables").mkdir(parents=True)
-    (sample_dir / "tables" / "consensus.tsv").write_text(CONSENSUS_TABLE)
-    write_bam(sample_dir / "consensus" / "V1.reads.bam", "V1.1", ["v_1", "half_1", "chim_1"], unmapped=["h_1"])
-    write_bam(sample_dir / "consensus" / "V2.reads.bam", "V2.1", ["low_1", "v_2", "v_1"])
+    rows = ["\t".join(CONSENSUS_COLUMNS)]
+    for i, (ref, description, organism, recovery, curated, label, segment, best, reads) in enumerate(VIMOP_FOUND):
+        called = int(recovery)
+        rows.append("\t".join(map(str, [i, ref, 100, len(reads), 100 - called, 100, 1.0, description, "", organism, segment,
+                                         "Unknown", curated, label, called, recovery, best])))
+        target = ref.split(".")[0]
+        write_bam(sample_dir / "consensus" / f"{target}.reads.bam", ref, reads, unmapped=["h_1"])
+        (sample_dir / "consensus" / f"{target}.reference.fasta").write_text(f">{ref} {description}\n{'A' * 100}\n")
+        (sample_dir / "consensus" / f"{target}.consensus.fasta").write_text(
+            f">consensus method=medaka reference={ref}\n{'A' * called}{'N' * (100 - called)}\n")
+    (sample_dir / "tables" / "consensus.tsv").write_text("\n".join(rows) + "\n")
     return sample_dir
 
 
@@ -825,14 +842,18 @@ def test_remove_viral_reads_with_vimop(tmp_path, fake_nextflow, capsys):
     assert os.path.realpath(call["cwd"]) == os.path.realpath(vimop_dir) and call["staged"] == ["run.fastq"]
     assert os.path.samefile(vimop_dir / "input" / "clean" / "run.fastq", run)  # a hard link, not a copy
 
-    # the reads vimop mapped to V1 (80% recovery) are removed; V2 (10%) keeps its reads
+    # the reads vimop mapped to viruses of 50% recovery or more are removed; V2 (10%) keeps its reads
     assert names_in(out) == ["h_1", "low_1", "v_2/1", "h_2"]
     assert names_in(tmp_path / "viral.fastq") == ["v_1", "half_1", "chim_1"]
-    assert (tmp_path / "clean" / "clean.removed_reads.tsv").read_text() == (
-        "virus\tdescription\trecovery\tremoved_reads\n"
-        "clean/V1.1\tV1.1 some virus\t80.00\t3\n"
-        "clean/V2.1\tV2.1 a phage\t10.00\t0\n"
-    )
+    assert (tmp_path / "clean" / "clean.removed_reads.tsv").read_text().splitlines() == [
+        "virus\tdescription\trecovery\tremoved_reads\torganism",
+        "clean/V1.1\tV1.1 lassa L\t80.00\t3\t",
+        "clean/V2.1\tV2.1 a phage\t10.00\t0\t",
+        "clean/V3.1\tV3.1 lassa S\t60.00\t1\t",
+        "clean/V4.1\tV4.1 lassa L, other strain\t70.00\t1\t",
+        "clean/V5.1\tV5.1 a new virus\t55.00\t1\t",
+        "clean/V6.1\tV6.1 sars-cov-2\t90.00\t1\t",
+    ]
     out_text = capsys.readouterr().out
     assert "4 of 7 reads kept, 3 viral reads removed" in out_text and "kept (below 50%)" in out_text
 
@@ -856,19 +877,61 @@ def test_remove_viral_reads_keeps_or_discards_the_vimop_run(tmp_path, fake_nextf
     assert (discarded / ".nextflow.log").exists()
 
 
+def test_remove_viral_reads_keeps_the_viral_reads_as_organisms(tmp_path, fake_minimap2, fake_nextflow, monkeypatch):
+    monkeypatch.setenv("SISPA_OUTPUT_DIR", str(tmp_path / "output"))
+    data_dir, raw = tmp_path / "data", tmp_path / "data" / "raw_data"
+    write_fastq(raw / "RUN" / "run.fastq", MIXED_READS)
+    assert remove_viral(tmp_path, "RUN", "--keep-viral", "--vimop-dir", str(tmp_path / "vimop"),
+                        "--nextflow", str(fake_nextflow)) == 0
+
+    # the removed reads are an own dataset
+    viral = tmp_path / "output" / "vimop_viral_fastqs" / "RUN_viral.fastq.gz"
+    assert names_in(viral) == ["v_1", "half_1", "chim_1"]
+    assert (data_dir / "own_datasets.tsv").read_text().splitlines()[1:] == [
+        f"RUN_viral\t\t\treads of RUN that vimop mapped to viruses with at least 50% recovery\t{viral}"]
+
+    # one organism per segment of a curated virus, from vimop's best reference, named
+    # <handle>_<accession>_<run>; V4 is not vimop's best LASV L, V2 is below 50%
+    ids = {"LASV_L_V1_RUN", "LASV_S_V3_RUN", "Newvirus_V5_RUN", "COVID_V6_RUN"}
+    orgs = organisms(data_dir)
+    assert set(orgs) == ids
+    lasv = orgs["LASV_L_V1_RUN"]
+    assert (lasv.filename, lasv.reference, lasv.source_dataset) == (
+        "virus_reads/LASV_L_V1_RUN.fastq.gz", "references/V1.fasta", "RUN_viral")
+    vimop_reference = tmp_path / "vimop" / "output" / "RUN_no_viral" / "consensus" / "V1.reference.fasta"
+    assert (data_dir / "references" / "V1.fasta").read_bytes() == vimop_reference.read_bytes()
+    assert (data_dir / "references" / "LASV_L_V1_RUN.consensus.fasta").read_text().startswith(
+        ">LASV_L_V1_RUN_consensus method=medaka")
+    report = (tmp_path / "output" / "background_fastqs" / "RUN_no_viral.removed_reads.tsv").read_text()
+    assert "\tLASV_L_V1_RUN\n" in report and "V4.1 lassa L, other strain\t70.00\t1\t\n" in report
+
+    # a second time needs --force, and keeps the names
+    assert remove_viral(tmp_path, "RUN", "--keep-viral", "--vimop-output", str(tmp_path / "vimop" / "output")) == 1
+    assert remove_viral(tmp_path, "RUN", "--keep-viral", "--force",
+                        "--vimop-output", str(tmp_path / "vimop" / "output")) == 0
+    assert set(organisms(data_dir)) == ids
+
+    # the same viruses from another run are organisms of their own, sharing the reference genome
+    write_fastq(raw / "RUN2" / "run.fastq", MIXED_READS)
+    assert remove_viral(tmp_path, "RUN2", "--keep-viral", "--vimop-output", str(tmp_path / "vimop" / "output")) == 0
+    assert "LASV_L_V1_RUN2" in organisms(data_dir)
+    assert organisms(data_dir)["LASV_L_V1_RUN2"].reference == "references/V1.fasta"
+
+
 def test_remove_viral_reads_min_recovery(tmp_path, fake_nextflow):
     run = write_fastq(tmp_path / "run.fastq", MIXED_READS)
     vimop_result(tmp_path / "earlier" / "run")
     common = ["--vimop-output", str(tmp_path / "earlier"), "--nextflow", "/does/not/exist"]  # vimop must not run
     assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "all.fastq"), "--min-recovery", "0", *common) == 0
     assert names_in(tmp_path / "all.fastq") == ["h_1", "h_2"]  # v_2/1 is v_2 in the BAM
-    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "none.fastq"), "--min-recovery", "90", *common) == 0
+    assert remove_viral(tmp_path, str(run), "-o", str(tmp_path / "none.fastq"), "--min-recovery", "95", *common) == 0
     assert names_in(tmp_path / "none.fastq") == [n for n, _ in MIXED_READS]
 
 
-def test_remove_viral_reads_default_output(tmp_path, fake_nextflow, capsys):
+def test_remove_viral_reads_default_output(tmp_path, fake_nextflow, monkeypatch):
+    monkeypatch.setenv("SISPA_OUTPUT_DIR", str(tmp_path / "output"))
     raw = tmp_path / "data" / "raw_data"
-    backgrounds = tmp_path / "data" / "output" / "background_fastqs"
+    backgrounds = tmp_path / "output" / "background_fastqs"
     write_fastq(raw / "RUN" / "run.fastq", MIXED_READS)
     assert remove_viral(tmp_path, "RUN", "--vimop-dir", str(tmp_path / "vimop"), "--nextflow", str(fake_nextflow)) == 0
     assert names_in(backgrounds / "RUN_no_viral.fastq.gz") == ["h_1", "low_1", "v_2/1", "h_2"]

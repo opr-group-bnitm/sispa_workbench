@@ -231,7 +231,9 @@ data/own_datasets.tsv
 output/fastqs/*
 !output/fastqs/.gitkeep
 # runs without their viral reads, from ./remove_viral_reads.py
-data/output/background_fastqs/*
-!data/output/background_fastqs/.gitkeep
+output/background_fastqs/*
+!output/background_fastqs/.gitkeep
+output/vimop_viral_fastqs/*
+!output/vimop_viral_fastqs/.gitkeep
 # vimop runs of ./remove_viral_reads.py, with nextflow's work folders
 output/vimop/

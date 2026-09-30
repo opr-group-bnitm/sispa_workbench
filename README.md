@@ -41,11 +41,12 @@ setup (its database and containers).
 | `data/virus_reads/` | reads of exactly one virus per FASTQ, made by `add_from_ref.py` |
 | `data/bacteria_reads/` | reads of exactly one bacterium per FASTQ, made by `add_from_ref.py` |
 | `data/host_reads/` | reads of exactly one host per FASTQ, made by `add_from_ref.py` |
-| `data/output/background_fastqs/` | runs without their viral reads, made by `remove_viral_reads.py` |
 | `data/input_compositions/` | your compositions for `create_sispa_run.py`; start from `template.csv` |
 | `data/alignments/` | where each read of those FASTQs aligns on its reference, e.g. `virus_reads/COVID.fastq.gz.alignments.tsv.gz`, made by `add_from_ref.py`; `create_sispa_run.py` needs them for depths |
 | `output/fastqs/` | artificial runs made by `create_sispa_run.py` |
 | `output/compositions/` | what each artificial run is made of |
+| `output/background_fastqs/` | runs without their viral reads, made by `remove_viral_reads.py` |
+| `output/vimop_viral_fastqs/` | the viral reads `remove_viral_reads.py --keep-viral` removed |
 | `output/vimop/<name>/` | vimop runs of `remove_viral_reads.py`: input, output, nextflow work folder and log |
 
 Sequencing data is git-ignored, and so are the two tables that describe your
@@ -110,7 +111,7 @@ viruses it found, for example to get a virus-free background:
 
 ```bash
 ./remove_viral_reads.py BOV-6760
-# -> data/output/background_fastqs/BOV-6760_no_viral.fastq.gz
+# -> output/background_fastqs/BOV-6760_no_viral.fastq.gz
 ```
 
 It runs vimop with its default settings,
@@ -125,7 +126,7 @@ human cells, or phages matching bacteria. Viruses with too few reads for a
 consensus stay in with the default.
 
 The input can be dataset ids, FASTQ files or folders of them. Without `-o`, the
-cleaned run goes to `data/output/background_fastqs/<name>_no_viral.fastq.gz`
+cleaned run goes to `output/background_fastqs/<name>_no_viral.fastq.gz`
 (written with `-o` into a new folder in `data/raw_data/`, it becomes a dataset
 in `data/own_datasets.tsv`). The reads removed per virus are listed in
 `<name>_no_viral.removed_reads.tsv` next to it, and `--viral-out` also writes
@@ -134,6 +135,21 @@ reads instead of running vimop (every sample in it counts); `--vimop-args` and
 `--nextflow-args` pass options on, e.g. `--vimop-args "--targets LASV"` or
 `--nextflow-args "-profile docker"`, and `-c` adds a nextflow config if your
 setup needs one.
+
+`--keep-viral` turns the removed reads into virus organisms. They are written
+to `output/vimop_viral_fastqs/<name>_viral.fastq.gz`, which is added to
+`data/own_datasets.tsv`, and each virus above `--min-recovery` is extracted
+from that file with `add_from_ref.py`. The reference is the genome vimop
+mapped to, copied to `data/references/<accession>.fasta`. A curated virus
+gives one organism per segment, from the reference vimop marks as best; the
+sample's consensus is kept as `data/references/<organism>.consensus.fasta`.
+Organisms are named `<handle>_<accession>_<name>`:
+
+| virus | organism id |
+|---|---|
+| curated, unsegmented | `COVID_OX637002_BOV-6760` (vimop's label) |
+| curated, segmented | `LASV_L_MG812631_BOV-6760` (label and segment) |
+| any other | `Paenibacillus_MZ092003_BOV-6760` (first word of vimop's organism name) |
 
 The vimop run is kept by default, for vimop's report and to reuse it.
 `--discard-vimop` deletes it (input, output, nextflow's work folder and logs)

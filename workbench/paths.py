@@ -44,9 +44,14 @@ def alignments_dir(data_dir: Path) -> Path:
     return data_dir / "alignments"
 
 
-def background_fastqs_dir(data_dir: Path) -> Path:
+def background_fastqs_dir(output_dir: Path) -> Path:
     """Where remove_viral_reads.py puts runs without their viral reads."""
-    return data_dir / "output" / "background_fastqs"
+    return output_dir / "background_fastqs"
+
+
+def vimop_viral_fastqs_dir(output_dir: Path) -> Path:
+    """Where remove_viral_reads.py --keep-viral puts the viral reads it removed."""
+    return output_dir / "vimop_viral_fastqs"
 
 
 def inside(path: Path, root: Path) -> Optional[str]:
